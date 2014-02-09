@@ -12,6 +12,7 @@ Tested on OS X but should work on anything that can run node and ffmpeg.
  * Extremely basic UI. Uses templates so adding skins and customizing should be easier.
  * Lets you try files anyways just in case detection got it wrong. (Let me know when if the detection was wrong).
  * Lots of debugging output (lol?)
+ * Ridiculous name
 
 ## Installation ##
 Depends on ffprobe that's provided by ffmpeg. You can install this using Homebrew or whatever package manager you have on your system.
