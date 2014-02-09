@@ -1,0 +1,32 @@
+<html>
+<body>
+
+Reading files from: {{=it.dir}}
+
+{{ if(it.dir != '/') { }}
+</br>
+<a href="viewfolder?f={{=it.parentdir}}">go up (../)</a>
+{{ } }}
+
+<div class="filelist">
+	{{ for(var name in it.files){ }}
+	{{ file = it.files[name]; }}
+	<div class="file">
+		{{? file.is_dir}}
+			<a href="viewfolder?f={{=name}}">{{=name}}</a>
+		{{?? file.compatible }}
+			<a href="playfile?f={{=name}}">{{=name}}</a>
+		{{??}}
+			{{=name}}
+		{{?}}
+		
+		<!--<div class="compatibility_data">
+			{{ var util = it.require('util'); }}
+			{{= util.inspect(file) }}
+		</div>-->
+	</div>
+	{{ } }}
+</div>
+
+</body>
+</html>
