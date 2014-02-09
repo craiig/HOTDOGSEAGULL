@@ -37,12 +37,14 @@ Make posts in the github forum if you have problems.
 To contribute, just send a pull request on github and I'll look at it. Bugs, new features, better UI, it's all welcome but I don't guarantee I'll accept everything.
 
 Here are some features that would be good to add:
- * Better basic layout, including thumbnails read from the file
+ * Better basic layout
+ * Read thumbnail from the video using ffmpeg
  * Skin & config system so you can switch between skins, etc.
  * UI & support for mobile browsers
  * Packaging this up for less technical users on other systems.
 
 Here's what I'm working on:
+ * Easier to use player experience
  * Offline/batch transcoding support using ffmpeg (and then maybe online transcoding)
 
 ## License ##

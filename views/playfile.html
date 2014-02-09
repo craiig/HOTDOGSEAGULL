@@ -18,34 +18,46 @@ It is licensed under the Apache 2.0 license.
 
   <p>Direct: <a href="{{=it.file_url}}">{{=it.file_url}}</a></p>
 
-	   <input class="vertical" type="range" min="0" max="100" step="1" onmouseup="setMediaVolume(1-this.value/100,false);">
-           <div class="vertical">Volume control</div>
+  	<div class="volume">
+	   <input type="range" min="0" max="100" step="1" onmouseup="setMediaVolume(1-this.value/100,false);">
+       <div>Volume control</div>
+   </div>
 
-      <div style=" margin:10px; float:left; display:block; width:90%;">
+      <div class="buttons">
         <button onclick="launchApp()">Launch app</button>
         <button onclick="stopApp()">Stop app</button>
         <br>
         <button onclick="loadMedia()">Load media</button>
         <button id="playpauseresume" onclick="playMedia()">Play</button>
         <button onclick="stopMedia()">Stop media</button>
-	<span id="muteText">Mute media</span>
-	<input type="checkbox" onclick="muteMedia(this);"> 
-      <div>
+		<span id="muteText">Mute media</span>
+		<input type="checkbox" onclick="muteMedia(this);"> 
+	</div>
 
-      <div style="margin:10px;">
-        Progress : <input id="progress" type="range" min="1" max="100" value="1" step="1" onmouseup="seekMedia(this.value);">
-      </div>
-      <div style="margin:10px;">
-        State : <span id="playerstate">IDLE</span>
-      </div>
+  <div class="progress">
+    Progress : <input id="progress" type="range" min="1" max="100" value="1" step="1" onmouseup="seekMedia(this.value);">
+  </div>
+  <div class="playerstate">
+    State : <span id="playerstate">IDLE</span>
+  </div>
 
-      <div style="margin:10px;">
-        <textarea rows="20" cols="70" id="debugmessage">
-        </textarea>
-      </div>
+  <div class="debug">
+    <textarea rows="20" cols="70" id="debugmessage">
+    </textarea>
+  </div>
 
-
-    </div>
+  <div class="compatibility">
+  	<div class='prediction'>
+  		Compatibility guess:
+  		{{? it.compatible }}
+  			Should work.
+  		{{??}}
+  			Won't work.
+  		{{?}}
+  	</div>
+  	<div class="debug">
+  		{{= it.compatibility_data }}
+  	</div>
   </div>
 
 <script type="text/javascript">

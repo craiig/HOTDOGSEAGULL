@@ -44,7 +44,15 @@ app.get('/viewfolder', function(req, res){
 
 app.get('/playfile', function(req, res){
 	file_url = path.join("/static_media", req.query.f)
-	res.render('playfile.html', {query: req.query, file_url: file_url, file_name: path.basename(file_url)})
+	chromecast.is_compatibile(path.join(media_folder, req.query.f), function(compat, data){
+		res.render('playfile.html', {
+			query: req.query, 
+			file_url: file_url, 
+			file_name: path.basename(file_url),
+			compatible: compat,
+			compat_data: data
+		});
+	});
 });
 
 app.listen(3000);
