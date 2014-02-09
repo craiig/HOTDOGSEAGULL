@@ -10,7 +10,7 @@ Tested on OS X but should work on anything that can run node and ffmpeg.
  * Uses the default media player on the Chromecast - no need to get a developer ID or publish an app.
  * Detects which of your local files are playable by the chromecast using ffmpeg - no need to guess.
  * Extremely basic UI. Uses templates so adding skins and customizing should be easier.
- * Let's you try files anyways just in case detection got it wrong. (Let me know when if the detection was wrong).
+ * Lets you try files anyways just in case detection got it wrong. (Let me know when if the detection was wrong).
 
 ## Installation ##
 Depends on ffprobe that's provided by ffmpeg. You can install this using Homebrew or whatever package manager you have on your system.
