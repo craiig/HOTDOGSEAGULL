@@ -44,7 +44,7 @@ Here are some features that would be good to add:
  * Packaging this up for less technical users on other systems.
 
 Here's what I'm working on:
- * Improving the player experience
+ * Improving the player interaction with the chromecast
  * Offline/batch transcoding support using ffmpeg (and then maybe online transcoding)
 
 ## License ##
