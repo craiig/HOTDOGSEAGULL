@@ -11,13 +11,14 @@ Reading files from: {{=it.dir}}
 <div class="filelist">
 	{{ for(var name in it.files){ }}
 	{{ file = it.files[name]; }}
+	{{ basename = it.require('path').basename(name); }}
 	<div class="file">
 		{{? file.is_dir}}
 			<a href="viewfolder?f={{=name}}">{{=name}}</a>
 		{{?? file.compatible }}
-			<a href="playfile?f={{=name}}">{{=name}}</a>
+			<a href="playfile?f={{=name}}">{{=basename}}</a>
 		{{??}}
-			{{=name}} (Not compatible. <a href="playfile?f={{=name}}">try)</a>
+			{{=basename}} (Not compatible. <a href="playfile?f={{=name}}">try)</a>
 		{{?}}
 		
 		<!--<div class="compatibility_data">
