@@ -43,7 +43,7 @@ Here are some features that would be good to add:
 Here's what I'm working on:
  * Offline/batch transcoding support using ffmpeg (and then maybe online transcoding)
 
- ## License ##
- I used some code from Google's CastHelloVideo-chrome which are under the Apache 2.0 License. https://github.com/googlecast/CastHelloVideo-chrome
+## License ##
+I used some code from Google's CastHelloVideo-chrome which are under the Apache 2.0 License. https://github.com/googlecast/CastHelloVideo-chrome
 
- You should consider my code to be under the Apache 2.0 license but with an ADDED REQUIREMENT THAT YOU MUST REFERENCE MY RIDICULOUS PROJECT NAME 
+You should consider my code to be under the Apache 2.0 license but with an ADDED REQUIREMENT THAT YOU MUST REFERENCE MY RIDICULOUS PROJECT NAME 
