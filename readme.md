@@ -18,10 +18,11 @@ Depends on ffprobe that's provided by ffmpeg. You can install this using Homebre
 Depends on node packages: express, dot, node-ffprobe
 
 ```
-git clone ...
 brew install ffmpeg
 npm install express dot node-ffprobe
-edit 'media_folder' variable in server.js to point
+
+git clone ...
+edit 'media_folder' variable in server.js to point to your media directory
 node server.js
 Visit http://localhost:3000 in a web browser.
 ```
