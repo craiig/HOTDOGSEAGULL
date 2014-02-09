@@ -11,6 +11,7 @@ Tested on OS X but should work on anything that can run node and ffmpeg.
  * Detects which of your local files are playable by the chromecast using ffmpeg - no need to guess.
  * Extremely basic UI. Uses templates so adding skins and customizing should be easier.
  * Lets you try files anyways just in case detection got it wrong. (Let me know when if the detection was wrong).
+ * Lots of debugging output (lol?)
 
 ## Installation ##
 Depends on ffprobe that's provided by ffmpeg. You can install this using Homebrew or whatever package manager you have on your system.
@@ -28,16 +29,20 @@ Visit http://<local_ip>:3000 in a web browser.
 ```
 NOTE: You need to use an ip that the chromecast can access. I.e. use 192.168.1.X and don't use localhost.
 
+## Known Issues ##
+As of Feb 9 2014:
+ * The Chromecast default media player doesn't seem to update the sender on the progress through the video. Manual status changes, such as pausing, muting, etc will cause the progress to get updated. This is also an issue in Google's CastHelloVideo, so I'm not sure if it's just not currently possible or I'm not adding a listener in the right places.
+
 ## Warranty & Support ##
 This server might be very insecure and may leak all your files. Security audits/fixes are more than welcome. For the love of god put this behind a firewall.
 
 Make posts in the github forum if you have problems.
 
-## Upcoming features & Contribute ##
+## Upcoming features & Contributing ##
 To contribute, just send a pull request on github and I'll look at it. Bugs, new features, better UI, it's all welcome but I don't guarantee I'll accept everything.
 
 Here are some features that would be good to add:
- * Better basic layout
+ * Better UI layout
  * Read thumbnail from the video using ffmpeg
  * Skin & config system so you can switch between skins, etc.
  * UI & support for mobile browsers
@@ -50,4 +55,4 @@ Here's what I'm working on:
 ## License ##
 I used some code from Google's CastHelloVideo-chrome which are under the Apache 2.0 License. https://github.com/googlecast/CastHelloVideo-chrome
 
-You should consider my code to be under the Apache 2.0 license but with an ADDED REQUIREMENT THAT YOU MUST REFERENCE MY RIDICULOUS PROJECT NAME 
+You should consider my code to be under the Apache 2.0 license but with an ADDED REQUIREMENT THAT YOU MUST EXPLICITLY MENTION THIS RIDICULOUS PROJECT NAME (HOTDOGSEAGULL) IN YOUR ACCOMPANYING DOCUMENTATION.

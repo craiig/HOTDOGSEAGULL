@@ -6,6 +6,21 @@ https://github.com/googlecast/CastHelloVideo-chrome
 It is licensed under the Apache 2.0 license.
 -->
 
+
+<!--
+
+flow should go
+new session: start playback asap
+existing session: show what's playing & allow it to be interrupted
+
+we'll only see existing sessions for our own paticular app - or someone else's
+
+
+todo: properly mirror volume control via session information
+
+
+	-->
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -15,48 +30,50 @@ It is licensed under the Apache 2.0 license.
 </head>
 <body>
   <h1>{{=it.file_name}}</h1>
-
-  <p>Direct: <a href="{{=it.file_url}}">{{=it.file_url}}</a></p>
-
   <p><a href="/viewfolder?f={{=it.file_dir}}">Back to directory</a></p>
 
-  Basic instructions until I can tune the video launcher process:<br/>
-  1. Launch app<br/>
-  2. Load Media<br/>
-  3. Play<br/>
-  4. If it didn't work you need to wait for the previous step to succeed. Watch the debug output!<br/>
-  5. I know this sucks to use and am working on it asap!<br/>
-  <br/>
+  <p>Direct URL to media: <a href="{{=it.file_url}}">{{=it.file_url}}</a></p>
 
-
-  	<div class="volume">
-	   <input type="range" min="0" max="100" step="1" onmouseup="setMediaVolume(1-this.value/100,false);">
-       <div>Volume control</div>
-   </div>
-
-      <div class="buttons">
-        <button onclick="launchApp()">Launch app</button>
-        <button onclick="stopApp()">Stop app</button>
-        <br>
-        <button onclick="loadMedia()">Load media</button>
-        <button id="playpauseresume" onclick="playMedia()">Play</button>
-        <button onclick="stopMedia()">Stop media</button>
-		<span id="muteText">Mute media</span>
-		<input type="checkbox" onclick="muteMedia(this);"> 
-	</div>
-
-  <div class="progress">
-    Progress : <input id="progress" type="range" min="1" max="100" value="1" step="1" onmouseup="seekMedia(this.value);">
-  </div>
+<h2>Player Controls</h2>
+  <div id="currentlyplaying">Currently Playing: <span id='currentmedianame'>Nothing</span></div>
   <div class="playerstate">
     State : <span id="playerstate">IDLE</span>
   </div>
+
+<div class="volume">
+	Volume: 100%
+	<input id="volume" type="range" min="0" max="100" step="1" onmouseup="setMediaVolume(1-this.value/100,false);">
+	0%
+	<div id="mute">
+	<span id="muteText">Mute media</span>
+	<input type="checkbox" id="mutebox" onclick="muteMedia(this);"> 
+	</div>
+</div>
+<div class="progress">
+    Progress : 0% <input id="progress" type="range" min="1" max="100" value="1" step="1" onmouseup="seekMedia(this.value);"> 100%
+  </div>
+
+<div class="debug_buttons">
+		<button onclick="loadAndPlayMedia()">Load &amp; play {{=it.file_name}}</button>
+        <br>
+        <button id="playpauseresume" onclick="playMedia()">Play</button>
+        <button id="playpauseresume" onclick="stopMedia()">Stop</button>
+</div>  
+
+
+<h2>Debug Controls</h2>
+   <div class="debug_buttons">
+        <button onclick="launchApp()">Launch app</button>
+        <button onclick="stopApp()">Stop app</button>
+        <button onclick="stopMedia()">Unload media</button>
+	</div>
 
   <div class="debug">
     <textarea rows="20" cols="70" id="debugmessage">
     </textarea>
   </div>
 
+<h2>File compatibility information</h2>
   <div class="compatibility">
   	<div class='prediction'>
   		Compatibility guess:

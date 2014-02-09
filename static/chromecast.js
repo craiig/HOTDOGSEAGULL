@@ -1,12 +1,14 @@
 /** This file was borrowed from Google's examples: helloVideos.js
 It provides a pretty straightforward set of APIS to start media playing on the chromecast,
 https://github.com/googlecast/CastHelloVideo-chrome
-
-I modified this file to remove video-app specific code but kept most of the boilerplate chrome initialization
-
 The google example code is licensed under the Apache 2.0 license.
 
+I modified this file to remove video-app specific code but kept most of the boilerplate chrome initialization.
+Made improvements to the way volume and mute are updated
 
+TODO:
+Present more basic UI
+Keyboard shortcuts
 
 */
 
@@ -16,11 +18,32 @@ The google example code is licensed under the Apache 2.0 license.
 var currentMediaSession = null;
 var currentVolume = 0.5;
 var progressFlag = 1;
+var volumeFlag = 1;
 var mediaCurrentTime = 0;
 var session = null;
 
 var currentMediaURL = "";
 
+function loadAndPlayMedia(){
+  //launch the app
+  //get ahold of a session
+  // and initiate media load that autoplays
+
+  //UI should disallow this function to be called until CC session is required
+
+  if(session == null){
+    //attempt to start a new session
+    chrome.cast.requestSession(function(e){
+      onRequestSessionSuccess(e);
+      //session is setup, so now we play media
+      loadMedia();
+    }, onLaunchError);
+
+  } else {
+    //session already exists so we can just laod
+    loadMedia();
+  }
+}
 
 /**
  * Call initialization
@@ -49,7 +72,6 @@ function initializeCastApi() {
  */
 function onInitSuccess() {
   appendMessage("init success");
-  //launchApp()
 }
 
 /**
@@ -73,7 +95,8 @@ function onSuccess(message) {
 function onStopAppSuccess() {
   console.log('Session stopped');
   appendMessage('Session stopped');
-  document.getElementById("casticon").src = 'images/cast_icon_idle.png'; 
+  //document.getElementById("casticon").src = 'images/cast_icon_idle.png'; 
+  session = null;
 }
 
 /**
@@ -90,7 +113,7 @@ function sessionListener(e) {
   }
   session.addMediaListener(
       onMediaDiscovered.bind(this, 'addMediaListener'));
-  session.addUpdateListener(sessionUpdateListener.bind(this));  
+  session.addUpdateListener(sessionUpdateListener.bind(this));
 }
 
 /**
@@ -124,8 +147,8 @@ function receiverListener(e) {
  * @param {string} m An index for media URL
  */
 function selectMedia(url) {
-  console.log("media selected" + url);
-  appendMessage("media selected" + url);
+  console.log("media selected " + url);
+  appendMessage("media selected " + url);
   currentMediaURL = url; 
   var playpauseresume = document.getElementById("playpauseresume");
 }
@@ -147,17 +170,15 @@ function onRequestSessionSuccess(e) {
   console.log("session success: " + e.sessionId);
   appendMessage("session success: " + e.sessionId);
   session = e;
-  //document.getElementById("casticon").src = 'images/cast_icon_active.png'; 
-
-  //loadMedia();
 }
 
 /**
  * callback on launch error
  */
-function onLaunchError() {
+function onLaunchError(e) {
   console.log("launch error");
   appendMessage("launch error");
+  console.log(e);
 }
 
 /**
@@ -171,7 +192,7 @@ function stopApp() {
  * load media
  * @param {string} i An index for media
  */
-function loadMedia(url) {
+function loadMedia() {
   if (!session) {
     console.log("no session");
     appendMessage("no session");
@@ -181,25 +202,17 @@ function loadMedia(url) {
   appendMessage("loading..." + currentMediaURL);
   var mediaInfo = new chrome.cast.media.MediaInfo(currentMediaURL);
   mediaInfo.contentType = 'video/mp4';
+  /*mediaInfo.customData = {
+    "fileurl": currentMediaUrl
+  }*/
+
   var request = new chrome.cast.media.LoadRequest(mediaInfo);
-  request.autoplay = false;
+  request.autoplay = true; //when you load media make it autoplay
   request.currentTime = 0;
-  
-  var payload = {
-    "title:" : url,
-    //"thumb" : mediaThumbs[i] //todo; add thumbs to hdsg
-  };
-
-  var json = {
-    "payload" : payload
-  };
-
-  request.customData = json;
 
   session.loadMedia(request,
     onMediaDiscovered.bind(this, 'loadMedia'),
     onMediaError);
-
 }
 
 /**
@@ -212,7 +225,11 @@ function onMediaDiscovered(how, mediaSession) {
   currentMediaSession = mediaSession;
   mediaSession.addUpdateListener(onMediaStatusUpdate);
   mediaCurrentTime = currentMediaSession.currentTime;
-  playpauseresume.innerHTML = 'Play';
+
+  onMediaStatusUpdate(true); //manually call update function? seems like we're not getting updates
+
+  //var playpauseresume = document.getElementById("playpauseresume");
+  //playpauseresume.innerHTML = 'Play';
 
   //playMedia();
   //document.getElementById("casticon").src = 'images/cast_icon_active.png'; 
@@ -225,7 +242,7 @@ function onMediaDiscovered(how, mediaSession) {
 function onMediaError(e) {
   console.log("media error: "+e.code+" "+e.description);
   appendMessage("media error: "+e.code+" "+e.description);
-  document.getElementById("casticon").src = 'images/cast_icon_warning.png'; 
+  //document.getElementById("casticon").src = 'images/cast_icon_warning.png'; 
 }
 
 /**
@@ -233,9 +250,38 @@ function onMediaError(e) {
  * @param {Object} e A non-null media object
  */
 function onMediaStatusUpdate(isAlive) {
+  console.log('onMediaStatusUpdate')
   if( progressFlag ) {
     document.getElementById("progress").value = parseInt(100 * currentMediaSession.currentTime / currentMediaSession.media.duration);
   }
+  if( volumeFlag ){
+    document.getElementById("volume").value = (1 - currentMediaSession.volume.level) * 100;
+  }
+  if(currentMediaSession.volume.muted){
+    document.getElementById("mutebox").checked = true;
+    document.getElementById('muteText').innerHTML = 'Unmute media';
+  } else {
+    document.getElementById("mutebox").checked = false;
+    document.getElementById('muteText').innerHTML = 'Mute media';
+  }
+
+  var playpauseresume = document.getElementById("playpauseresume");
+  switch(currentMediaSession.playerState){
+    case "BUFFERING":
+      playpauseresume.innerHTML = 'Pause';
+      break;
+    case "PLAYING":
+      playpauseresume.innerHTML = 'Pause';
+      break;
+    case "PAUSED":
+      playpauseresume.innerHTML = 'Resume';
+      break;
+    case "IDLE":
+      playpauseresume.innerHTML = 'Play';
+      break;
+  } 
+  document.getElementById("currentmedianame").innerHTML = currentMediaSession.media.contentId;
+
   document.getElementById("playerstate").innerHTML = currentMediaSession.playerState;
 }
 
@@ -299,6 +345,7 @@ function setMediaVolume(level, mute) {
   if( !currentMediaSession ) 
     return;
 
+  volumeFlag = 0;
   var volume = new chrome.cast.Volume();
   volume.level = level;
   currentVolume = volume.level;
@@ -306,8 +353,35 @@ function setMediaVolume(level, mute) {
   var request = new chrome.cast.media.VolumeRequest();
   request.volume = volume;
   currentMediaSession.setVolume(request,
-    mediaCommandSuccessCallback.bind(this, 'media set-volume done'),
+    onVolumeSuccess.bind(this, 'media set-volume done'),
     onError);
+}
+
+/**
+ * callback on success for media commands
+ * @param {string} info A message string
+ * @param {Object} e A non-null media object
+ */
+function onVolumeSuccess(info) {
+  console.log(info);
+  appendMessage(info);
+  setTimeout(function(){volumeFlag = 1},1500);
+}
+
+//function that avoids the volumeFlag
+function setMediaMute(mute) {
+  var volume = new chrome.cast.Volume();
+  volume.level = currentVolume;
+  volume.muted = mute;
+  var request = new chrome.cast.media.VolumeRequest();
+  request.volume = volume;
+currentMediaSession.setVolume(request,
+    onMuteSuccess.bind(this, 'media mute done'),
+    onError);
+}
+function onMuteSuccess(info) {
+  console.log(info);
+  appendMessage(info);
 }
 
 /**
@@ -317,12 +391,12 @@ function setMediaVolume(level, mute) {
 function muteMedia(cb) {
   if( cb.checked == true ) {
     document.getElementById('muteText').innerHTML = 'Unmute media';
-    setMediaVolume(currentVolume, true);
+    setMediaMute(true);
     appendMessage("media muted");
   }
   else {
     document.getElementById('muteText').innerHTML = 'Mute media';
-    setMediaVolume(currentVolume, false);
+    setMediaMute(false);
     appendMessage("media unmuted");
   } 
 }
