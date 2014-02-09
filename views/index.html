@@ -17,7 +17,7 @@ Reading files from: {{=it.dir}}
 		{{?? file.compatible }}
 			<a href="playfile?f={{=name}}">{{=name}}</a>
 		{{??}}
-			{{=name}}
+			{{=name}} (Not compatible. <a href="playfile?f={{=name}}">try)</a>
 		{{?}}
 		
 		<!--<div class="compatibility_data">

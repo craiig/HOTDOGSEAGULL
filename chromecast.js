@@ -9,8 +9,10 @@
 // Audio decoding: HE-AAC, LC-AAC, CELT/Opus, MP3, Vorbis
 // Image formats: BMP, GIF, JPEG, PNG, WEBP
 // Containers: MP4, WebM
-// Unofficial support: 
+//
+// Unofficial support:
 // Video: h264 level 3.1
+// Containers: MKV (presented as mp4)
 
 var probe = require('node-ffprobe');
 var path = require('path');

@@ -7,7 +7,7 @@ This is intended as a starting point for UNIX inclined people to set up local me
 Tested on OS X but should work on anything that can run node and ffmpeg.
 
 ## Features ##
- * Uses the default media player on the Chromecast - no need to get a developer ID or publish an app.
+ * Uses the default media player app on the Chromecast - no need to get a developer ID or publish an app.
  * Detects which of your local files are playable by the chromecast using ffmpeg - no need to guess.
  * Extremely basic UI. Uses templates so adding skins and customizing should be easier.
  * Lets you try files anyways just in case detection got it wrong. (Let me know when if the detection was wrong).
@@ -44,7 +44,7 @@ Here are some features that would be good to add:
  * Packaging this up for less technical users on other systems.
 
 Here's what I'm working on:
- * Easier to use player experience
+ * Improving the player experience
  * Offline/batch transcoding support using ffmpeg (and then maybe online transcoding)
 
 ## License ##

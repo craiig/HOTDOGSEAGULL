@@ -67,6 +67,7 @@ function initializeCastApi() {
  */
 function onInitSuccess() {
   appendMessage("init success");
+  launchApp()
 }
 
 /**
@@ -164,7 +165,9 @@ function onRequestSessionSuccess(e) {
   console.log("session success: " + e.sessionId);
   appendMessage("session success: " + e.sessionId);
   session = e;
-  document.getElementById("casticon").src = 'images/cast_icon_active.png'; 
+  //document.getElementById("casticon").src = 'images/cast_icon_active.png'; 
+
+  loadMedia();
 }
 
 /**
@@ -228,7 +231,9 @@ function onMediaDiscovered(how, mediaSession) {
   mediaSession.addUpdateListener(onMediaStatusUpdate);
   mediaCurrentTime = currentMediaSession.currentTime;
   playpauseresume.innerHTML = 'Play';
-  document.getElementById("casticon").src = 'images/cast_icon_active.png'; 
+
+  playMedia();
+  //document.getElementById("casticon").src = 'images/cast_icon_active.png'; 
 }
 
 /**

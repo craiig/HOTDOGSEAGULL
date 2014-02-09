@@ -18,6 +18,8 @@ It is licensed under the Apache 2.0 license.
 
   <p>Direct: <a href="{{=it.file_url}}">{{=it.file_url}}</a></p>
 
+  <p><a href="/viewfolder?f={{=it.file_dir}}">Back to directory</a></p>
+
   	<div class="volume">
 	   <input type="range" min="0" max="100" step="1" onmouseup="setMediaVolume(1-this.value/100,false);">
        <div>Volume control</div>
@@ -56,7 +58,14 @@ It is licensed under the Apache 2.0 license.
   		{{?}}
   	</div>
   	<div class="debug">
-  		{{= it.compatibility_data }}
+  		Container compatible: {{= it.compatibility_data.container == 1 ? "yes" : "no" }}<br/>
+  		Video compatible: {{= it.compatibility_data.video == 1 ? "yes" : "no" }}<br/>
+  		Audio compatible: {{= it.compatibility_data.audio == 1 ? "yes" : "no" }}<br/>
+  		<br/>
+  		Full Compatibility Debugging Data: <br/>
+		<pre>
+  		{{= it.require('util').inspect(it.compatibility_data, {depth: null}) }}
+  		</pre>
   	</div>
   </div>
 
