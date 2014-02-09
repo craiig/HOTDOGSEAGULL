@@ -1,8 +1,8 @@
 
-# Basic local media player for the Chromecast #
+# HOTDOGSEAGULL #
 This is a server built in node.js that lets you browse your media using a browser and push it up to a chromecast. Should be suitable for running on a home server.
 
-This is intended as a starting point for UNIX inclined people to set up local media servers for the chromecast. The UI intentionally looks bad because I want to leave the UI to others while I focus on the technical aspects. If you make any improvements to this code, feel free to send a pull request. See below for more details on future development.
+This is intended as a starting point for UNIX inclined people to set up local media servers for the chromecast. The UI intentionally looks bad because I want to leave the UI to others while I focus on the technical aspects. If you make any improvements to this code, feel free to send a pull request. See below for more details on future development 
 
 Tested on OS X but should work on anything that can run node and ffmpeg.
 
@@ -21,6 +21,7 @@ Depends on node packages: express, dot, node-ffprobe
 git clone ...
 brew install ffmpeg
 npm install express dot node-ffprobe
+edit 'media_folder' variable in server.js to point
 node server.js
 Visit http://localhost:3000 in a web browser.
 ```
@@ -45,4 +46,4 @@ Here's what I'm working on:
  ## License ##
  I used some code from Google's CastHelloVideo-chrome which are under the Apache 2.0 License. https://github.com/googlecast/CastHelloVideo-chrome
 
- You should consider my code to be under the GPL
+ You should consider my code to be under the Apache 2.0 license but with an ADDED REQUIREMENT THAT YOU MUST REFERENCE MY RIDICULOUS PROJECT NAME 
