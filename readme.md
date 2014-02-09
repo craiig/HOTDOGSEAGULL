@@ -24,8 +24,9 @@ npm install express dot node-ffprobe
 git clone ...
 edit 'media_folder' variable in server.js to point to your media directory
 node server.js
-Visit http://localhost:3000 in a web browser.
+Visit http://<local_ip>:3000 in a web browser.
 ```
+NOTE: You need to use an ip that the chromecast can access. I.e. use 192.168.1.X and don't use localhost.
 
 ## Warranty & Support ##
 This server might be very insecure and may leak all your files. Security audits/fixes are more than welcome. For the love of god put this behind a firewall.

@@ -1,3 +1,56 @@
-play this url: {{=it.query.f}}
-<br/>
-//now we work with the chromecast!
+
+<!-- This file was borrowed from Google's examples
+It provides a pretty straightforward set of APIS to start media playing on the chromecast,
+https://github.com/googlecast/CastHelloVideo-chrome
+
+It is licensed under the Apache 2.0 license.
+-->
+
+<!DOCTYPE html>
+<html>
+<head>
+<title>{{=it.file_name}} to Chromecast</title>
+<script type="text/javascript" src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js"></script>
+<script src="/static/chromecast.js"></script>
+</head>
+<body>
+  <h1>{{=it.file_name}}</h1>
+
+  <p>Direct: <a href="{{=it.file_url}}">{{=it.file_url}}</a></p>
+
+	   <input class="vertical" type="range" min="0" max="100" step="1" onmouseup="setMediaVolume(1-this.value/100,false);">
+           <div class="vertical">Volume control</div>
+
+      <div style=" margin:10px; float:left; display:block; width:90%;">
+        <button onclick="launchApp()">Launch app</button>
+        <button onclick="stopApp()">Stop app</button>
+        <br>
+        <button onclick="loadMedia()">Load media</button>
+        <button id="playpauseresume" onclick="playMedia()">Play</button>
+        <button onclick="stopMedia()">Stop media</button>
+	<span id="muteText">Mute media</span>
+	<input type="checkbox" onclick="muteMedia(this);"> 
+      <div>
+
+      <div style="margin:10px;">
+        Progress : <input id="progress" type="range" min="1" max="100" value="1" step="1" onmouseup="seekMedia(this.value);">
+      </div>
+      <div style="margin:10px;">
+        State : <span id="playerstate">IDLE</span>
+      </div>
+
+      <div style="margin:10px;">
+        <textarea rows="20" cols="70" id="debugmessage">
+        </textarea>
+      </div>
+
+
+    </div>
+  </div>
+
+<script type="text/javascript">
+	var file = document.location.origin + '{{=it.file_url}}';
+	selectMedia(file);
+</script>
+</body>
+</html>

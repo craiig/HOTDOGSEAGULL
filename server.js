@@ -21,6 +21,12 @@ app.engine('html', function(path, options, callback){
 	});
 })
 
+app.use(express.logger());
+
+app.use('/static', express.static(__dirname + '/static'));
+
+app.use('/static_media', express.static(path.join(__dirname, media_folder) ));
+
 app.get('/', function(req, res){
 	chromecast.read_dir(media_folder, "/", function(files){
 		res.render('index.html', {files: files, dir: media_folder})	
@@ -37,7 +43,8 @@ app.get('/viewfolder', function(req, res){
 });
 
 app.get('/playfile', function(req, res){
-	res.render('playfile.html', {query: req.query})
+	file_url = path.join("/static_media", req.query.f)
+	res.render('playfile.html', {query: req.query, file_url: file_url, file_name: path.basename(file_url)})
 });
 
 app.listen(3000);
