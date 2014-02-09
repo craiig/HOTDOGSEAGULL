@@ -67,7 +67,7 @@ function initializeCastApi() {
  */
 function onInitSuccess() {
   appendMessage("init success");
-  launchApp()
+  //launchApp()
 }
 
 /**
@@ -167,7 +167,7 @@ function onRequestSessionSuccess(e) {
   session = e;
   //document.getElementById("casticon").src = 'images/cast_icon_active.png'; 
 
-  loadMedia();
+  //loadMedia();
 }
 
 /**
@@ -232,7 +232,7 @@ function onMediaDiscovered(how, mediaSession) {
   mediaCurrentTime = currentMediaSession.currentTime;
   playpauseresume.innerHTML = 'Play';
 
-  playMedia();
+  //playMedia();
   //document.getElementById("casticon").src = 'images/cast_icon_active.png'; 
 }
 
