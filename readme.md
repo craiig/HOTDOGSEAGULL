@@ -28,7 +28,7 @@ Visit http://localhost:3000 in a web browser.
 ```
 
 ## Warranty & Support ##
-This server might be very insecure and will leak all your files. Security audits/fixes are more than welcome. For the love of god put this behind a firewall.
+This server might be very insecure and may leak all your files. Security audits/fixes are more than welcome. For the love of god put this behind a firewall.
 
 Make posts in the github forum if you have problems.
 
