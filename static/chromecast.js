@@ -18,26 +18,8 @@ var currentVolume = 0.5;
 var progressFlag = 1;
 var mediaCurrentTime = 0;
 var session = null;
-var mediaURLs = [
-           'http://192.168.1.92:8080/torrents/Almost.Human.S01E09.HDTV.x264-LOL.mp4',
-           'http://commondatastorage.googleapis.com/gtv-videos-bucket/ED_1280.mp4',
-           'http://commondatastorage.googleapis.com/gtv-videos-bucket/tears_of_steel_1080p.mov',
-           'http://commondatastorage.googleapis.com/gtv-videos-bucket/reel_2012_1280x720.mp4',
-           'http://commondatastorage.googleapis.com/gtv-videos-bucket/Google%20IO%202011%2045%20Min%20Walk%20Out.mp3'];
-var mediaTitles = [
-           'Big Buck Bunny',
-           'Elephant Dream',
-           'Tears of Steel',
-           'Reel 2012',
-           'Google I/O 2011 Audio'];
 
-var mediaThumbs = [
-           'images/bunny.jpg',
-           'images/ed.jpg',
-           'images/Tears.jpg',
-           'images/reel.jpg',
-           'images/google-io-2011.jpg'];
-var currentMediaURL = mediaURLs[0];
+var currentMediaURL = "";
 
 
 /**
