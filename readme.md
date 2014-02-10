@@ -20,8 +20,8 @@ Depends on ffprobe that's provided by ffmpeg. You can install this using Homebre
 Depends on node packages: express, dot, node-ffprobe
 
 ```
-git clone ...
-cd ..
+git clone https://github.com/craiig/HOTDOGSEAGULL
+cd HOTDOGSEAGULL
 brew install ffmpeg
 npm install express dot node-ffprobe
 edit 'media_folder' variable in server.js to point to your media directory
