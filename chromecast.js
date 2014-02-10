@@ -141,7 +141,9 @@ var read_dir = function(basedir, dir, callback){
 			});
 		};
 
-	append_compat(to_check.pop());
+	if(to_check.length > 0){
+		append_compat(to_check.pop());
+	}
 }
 
 /*var transcode_recommendation = function(file, callback){

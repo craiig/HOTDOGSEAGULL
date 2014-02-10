@@ -1,5 +1,5 @@
 //var media_folder = "media"
-var media_folder = "media"
+var media_folder = "media/"
 var chromecast = require('./chromecast.js')
 
 var fs = require('fs');
