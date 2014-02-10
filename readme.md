@@ -51,6 +51,8 @@ Here are some features that would be good to add:
 
 Here's what I'm working on:
  * Improving the player interaction with the chromecast
+ * Play whole directory
+ * DLNA support (if possible)
  * Offline/batch transcoding support using ffmpeg (and then maybe online transcoding)
 
 ## License ##
