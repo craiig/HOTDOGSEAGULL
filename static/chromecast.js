@@ -240,8 +240,8 @@ function onMediaDiscovered(how, mediaSession) {
  * @param {Object} e A non-null media object
  */
 function onMediaError(e) {
-  console.log("media error: "+e.code+" "+e.description);
-  appendMessage("media error: "+e.code+" "+e.description);
+  console.log("media error: code: "+e.code+" description: "+e.description+" details: "+e.details);
+  appendMessage("media error: code: "+e.code+" description: "+e.description+" details: "+e.details);
   //document.getElementById("casticon").src = 'images/cast_icon_warning.png'; 
 }
 

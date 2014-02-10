@@ -1,5 +1,6 @@
 //var media_folder = "media"
-var media_folder = "media/"
+//var media_folder = "media/"
+var media_folder = "/Users/craig/Documents/Code/Chromecast/mediaserver/media"
 var chromecast = require('./chromecast.js')
 
 var fs = require('fs');
@@ -26,7 +27,7 @@ app.use(express.logger());
 
 app.use('/static', express.static(__dirname + '/static'));
 
-app.use('/static_media', express.static(path.join(__dirname, media_folder) ));
+app.use('/static_media', express.static( path.resolve(__dirname, media_folder) ));
 
 app.get('/', function(req, res){
 	chromecast.read_dir(media_folder, "/", function(files){
@@ -45,6 +46,7 @@ app.get('/viewfolder', function(req, res){
 
 app.get('/playfile', function(req, res){
 	file_url = path.join("/static_media", req.query.f)
+
 	chromecast.is_compatibile(path.join(media_folder, req.query.f), function(compat, data){
 		res.render('playfile.html', {
 			query: req.query, 
