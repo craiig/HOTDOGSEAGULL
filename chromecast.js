@@ -73,7 +73,7 @@ var is_compatibile = function(file, callback){
 			if(stream.codec_type == 'video'
 				&& stream.codec_name == 'h264' 
 				&& stream.profile == 'High'
-				&& (stream.level == 31 || stream.level == 41 || stream.level == 42 || stream.level == 5)
+				&& (stream.level == 31 || stream.level == 41 || stream.level == 42 || stream.level == 5 || stream.level == 50)
 				){
 					obj.video = 1;
 			}
