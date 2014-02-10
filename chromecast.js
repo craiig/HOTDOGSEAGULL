@@ -87,7 +87,7 @@ var is_compatibile = function(file, callback){
 
 		//ffprobe returns a list of formats that the container might be classified as
 		// i.e. for mp4/mov/etc we'll get a string that looks like: 'mov,mp4,m4a,3gp,3g2,mj2'
-		if(  probeData.format.format_name.split(",").indexOf("mp4") > -1 ){
+		if(  probeData.format.format_name.split(",").indexOf("mp4") > -1 || probeData.format.format_name.split(",").indexOf("webm") > -1){
 			obj.container = 1;
 		}
 
