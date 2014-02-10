@@ -143,6 +143,8 @@ var read_dir = function(basedir, dir, callback){
 
 	if(to_check.length > 0){
 		append_compat(to_check.pop());
+	} else {
+		callback(response_obj);
 	}
 }
 
