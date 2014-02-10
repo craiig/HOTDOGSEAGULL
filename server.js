@@ -1,3 +1,4 @@
+//var media_folder = "media"
 var media_folder = "media"
 var chromecast = require('./chromecast.js')
 
@@ -55,5 +56,19 @@ app.get('/playfile', function(req, res){
 		});
 	});
 });
+
+/*app.get('/transcode', function(req, res){
+	//file_url = path.join("/static_media", req.query.f)
+	chromecast.is_compatibile(path.join(media_folder, req.query.f), function(compat, data){
+		res.render('playfile.html', {
+			query: req.query, 
+			file_url: file_url,
+			file_dir: path.dirname(req.query.f),
+			file_name: path.basename(file_url),
+			compatible: compat,
+			compatibility_data: data
+		});
+	});
+});*/
 
 app.listen(3000);

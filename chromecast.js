@@ -128,6 +128,7 @@ var read_dir = function(basedir, dir, callback){
 	});
 
 	var append_compat = function(file){
+			console.log("checking compatbility: basedir: "+basedir+" file: "+file)
 			is_compatibile(path.join(basedir, file), function(compat, data){
 				response_obj[file].compatibility_data = data;
 				response_obj[file].compatible = compat;
@@ -143,7 +144,23 @@ var read_dir = function(basedir, dir, callback){
 	append_compat(to_check.pop());
 }
 
+/*var transcode_recommendation = function(file, callback){
+	//calls callback with (suggested_ffmpeg_command, data)
+	//where suggested_ffmpeg_command is the suggested command to do the conversion to a CC supported format
+	//it's smart enough to not transcode streams that already work
+	//where data contains the response from is_compatible
+
+	is_compatible(file, function(compat, ffprobe_data){
+		command = "do nothing"
+		if(compat == 0){
+			command = "ffmpeg " + file
+		}
+		callback(command, ffprobe_data)
+	})
+}*/
+
 module.exports = {
   is_compatibile: is_compatibile,
-  read_dir: read_dir
+  read_dir: read_dir,
+  //transcode_recommendation: transcode_recommendation
 }
