@@ -100,8 +100,8 @@ todo: properly mirror volume control via session information
   </div>
 
 <script type="text/javascript">
-	var file = document.location.origin + '{{=it.file_url}}';
-	var transcode = document.location.origin + '{{=it.transcode_url}}';
+	var file = document.location.origin + '{{= it.file_url.replace("'", "\\'") }}';
+	var transcode = document.location.origin + '{{= it.transcode_url.replace("'", "\\'") }}';
 	selectMedia(file);
 </script>
 </body>
