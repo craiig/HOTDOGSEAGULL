@@ -18,7 +18,7 @@ Tested on OS X but should work on anything that can run node and ffmpeg.
 ## Installation ##
 Depends on ffprobe that's provided by ffmpeg. You can install this using Homebrew or whatever package manager you have on your system.
 
-Depends on node packages: express, dot, node-ffprobe
+Depends on node packages: express, dot, node-ffprobe, fluent-ffmpeg
 
 ```
 git clone https://github.com/craiig/HOTDOGSEAGULL
