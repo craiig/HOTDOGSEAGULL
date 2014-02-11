@@ -9,6 +9,7 @@ Tested on OS X but should work on anything that can run node and ffmpeg.
 ## Features ##
  * Uses the default media player app on the Chromecast - no need to get a developer ID or publish an app.
  * Detects which of your local files are playable by the chromecast using ffmpeg - no need to guess.
+ * Optional on-the-fly transcoding that only transcodes the streams that need it. (I.e. audio/video that is already compatible will not be transcoded.)
  * Extremely basic UI. Uses templates so adding skins and customizing should be easier.
  * Lets you try files anyways just in case detection got it wrong. (Let me know when detection is wrong).
  * Lots of debugging output (lol?)
@@ -23,7 +24,7 @@ Depends on node packages: express, dot, node-ffprobe
 git clone https://github.com/craiig/HOTDOGSEAGULL
 cd HOTDOGSEAGULL
 brew install ffmpeg
-npm install express dot node-ffprobe
+npm install
 edit 'media_folder' variable in server.js to point to your media directory
 node server.js
 Visit http://<local_ip>:3000 in a web browser.
@@ -52,6 +53,7 @@ Here are some features that would be good to add:
 Here's what I'm working on:
  * Improving the player interaction with the chromecast
  * Play whole directory
+ * Subtitles
  * DLNA support (if possible)
  * Offline/batch transcoding support using ffmpeg (and then maybe online transcoding)
 

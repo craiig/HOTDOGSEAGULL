@@ -70,20 +70,31 @@ var is_compatibile = function(file, callback){
 		console.log("--")*/
 		for(i in probeData.streams){
 			stream = probeData.streams[i]
-			if(stream.codec_type == 'video'
-				&& stream.codec_name == 'h264' 
-				&& stream.profile == 'High'
-				&& (stream.level == 31 || stream.level == 41 || stream.level == 42 || stream.level == 5 || stream.level == 50)
-				){
-					obj.video = 1;
+			if(stream.codec_type == 'video'){
+				if(stream.codec_name == 'h264' 
+					&& stream.profile == 'High'
+					&& (stream.level == 31 || stream.level == 41 || stream.level == 42 || stream.level == 5 || stream.level == 50)
+					){
+						obj.video = 1;
+						obj.video_transcode = "-vcodec copy"
+				} else {
+					obj.video_transcode = "-vcodec libx264 -profile:v high -level 5.0"
+				}
 			}
 
-			if(stream.codec_type == 'audio'
-				&& (stream.codec_name == 'aac' || stream.codec_name == 'mp3' || stream.codec_name == 'vorbis' || stream.codec_name == 'opus')
-				){
-				obj.audio = 1
+			if(stream.codec_type == 'audio'){
+				if( (stream.codec_name == 'aac' || stream.codec_name == 'mp3' || stream.codec_name == 'vorbis' || stream.codec_name == 'opus') ){
+				obj.audio = 1;
+				obj.audio_transcode = "-acodec copy"
+				} else {
+				obj.audio_transcode = "-acodec libfaac -q:a 100"
+				}
 			}
 		}
+
+		//generate a recommended transcode command
+		var output_file = '"' + path.basename(file, path.extname(file)) + '.mp4"'
+		obj.transcode_cmd = "ffmpeg -i \"" + path.basename(file) +"\" " + obj.video_transcode + " " + obj.audio_transcode +" "+ output_file
 
 		//ffprobe returns a list of formats that the container might be classified as
 		// i.e. for mp4/mov/etc we'll get a string that looks like: 'mov,mp4,m4a,3gp,3g2,mj2'
@@ -147,21 +158,6 @@ var read_dir = function(basedir, dir, callback){
 		callback(response_obj);
 	}
 }
-
-/*var transcode_recommendation = function(file, callback){
-	//calls callback with (suggested_ffmpeg_command, data)
-	//where suggested_ffmpeg_command is the suggested command to do the conversion to a CC supported format
-	//it's smart enough to not transcode streams that already work
-	//where data contains the response from is_compatible
-
-	is_compatible(file, function(compat, ffprobe_data){
-		command = "do nothing"
-		if(compat == 0){
-			command = "ffmpeg " + file
-		}
-		callback(command, ffprobe_data)
-	})
-}*/
 
 module.exports = {
   is_compatibile: is_compatibile,

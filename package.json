@@ -1,0 +1,15 @@
+{ "name" : "HOTDOGSEAGULL"
+, "version" : "0.2.0"
+, "description" : "A server that casts local media to a chromecast"
+, "main" : "server.js"
+, "repository" :
+  { "type" : "git"
+  , "url" : "https://github.com/craiig/HOTDOGSEAGULL"
+  }
+,"dependencies" :
+  { "express" : ">=3.4.8",
+  	"dot" : ">=1.0.2",
+  	"node-ffprobe" :  ">=1.2.2",
+  	"fluent-ffmpeg" : ">=1.5.2"
+  }
+}

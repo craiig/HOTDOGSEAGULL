@@ -33,6 +33,7 @@ todo: properly mirror volume control via session information
   <p><a href="/viewfolder?f={{=it.file_dir}}">Back to directory</a></p>
 
   <p>Direct URL to media: <a href="{{=it.file_url}}">{{=it.file_url}}</a></p>
+  <p>Direct URL to transcode: <a href="{{=it.transcode_url}}">{{=it.transcode_url}}</a></p>
 
 <h2>Player Controls</h2>
   <div id="currentlyplaying">Currently Playing: <span id='currentmedianame'>Nothing</span></div>
@@ -54,8 +55,11 @@ todo: properly mirror volume control via session information
   </div>
 
 <div class="debug_buttons">
-		<button onclick="loadAndPlayMedia()">Load &amp; play {{=it.file_name}}</button>
+		<button onclick="selectMedia(file); loadAndPlayMedia()">Load &amp; play {{=it.file_name}}</button>
+		<br>
+		<button onclick="selectMedia(transcode); loadAndPlayMedia()">Transcode &amp; Load &amp; play {{=it.file_name}}</button>
         <br>
+
         <button id="playpauseresume" onclick="playMedia()">Play</button>
         <button id="playpauseresume" onclick="stopMedia()">Stop</button>
 </div>  
@@ -97,6 +101,7 @@ todo: properly mirror volume control via session information
 
 <script type="text/javascript">
 	var file = document.location.origin + '{{=it.file_url}}';
+	var transcode = document.location.origin + '{{=it.transcode_url}}';
 	selectMedia(file);
 </script>
 </body>

@@ -1,12 +1,11 @@
-//var media_folder = "media"
-//var media_folder = "media/"
-var media_folder = "/Users/craig/Documents/Code/Chromecast/mediaserver/media"
+var media_folder = "media"
 var chromecast = require('./chromecast.js')
 
 var fs = require('fs');
 var dot = require('dot');
 var express = require('express');
 var path = require('path')
+var ffmpeg = require('fluent-ffmpeg');
 
 var app = express();
 
@@ -46,11 +45,13 @@ app.get('/viewfolder', function(req, res){
 
 app.get('/playfile', function(req, res){
 	file_url = path.join("/static_media", req.query.f)
+	transcode_url = path.join("/transcode?f=", req.query.f)
 
 	chromecast.is_compatibile(path.join(media_folder, req.query.f), function(compat, data){
 		res.render('playfile.html', {
 			query: req.query, 
 			file_url: file_url,
+			transcode_url: transcode_url,
 			file_dir: path.dirname(req.query.f),
 			file_name: path.basename(file_url),
 			compatible: compat,
@@ -59,18 +60,29 @@ app.get('/playfile', function(req, res){
 	});
 });
 
-/*app.get('/transcode', function(req, res){
-	//file_url = path.join("/static_media", req.query.f)
-	chromecast.is_compatibile(path.join(media_folder, req.query.f), function(compat, data){
-		res.render('playfile.html', {
-			query: req.query, 
-			file_url: file_url,
-			file_dir: path.dirname(req.query.f),
-			file_name: path.basename(file_url),
-			compatible: compat,
-			compatibility_data: data
+app.get('/transcode', function(req, res) {
+	res.contentType('video/mp4');
+
+	// borrowed from the  ffmpeg-fluent examples
+	pathToMovie = path.join(media_folder, req.query.f)
+
+	chromecast.is_compatibile(pathToMovie, function(compat, data){
+
+		console.log("calling transcode with options: "+[data.audio_transcode, data.video_transcode])
+		var proc = new ffmpeg({ source: pathToMovie, nolog: true, timeout: 0 })
+		// use the 'flashvideo' preset (located in /lib/presets/flashvideo.js)
+		//.usingPreset('flashvideo')
+		.toFormat('matroska')
+		.addOptions( [data.audio_transcode, data.video_transcode] )
+		//.withVideoCodec('copy')
+		//.withAudioCodec('copy')
+		// save to stream
+		.writeToStream(res, function(retcode, error){
+		console.log('transcoding finished: '+retcode+" error: "+error);
 		});
+
 	});
-});*/
+ 
+});
 
 app.listen(3000);
