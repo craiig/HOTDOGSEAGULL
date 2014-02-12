@@ -73,7 +73,7 @@ app.get('/transcode', function(req, res) {
 		// use the 'flashvideo' preset (located in /lib/presets/flashvideo.js)
 		//.usingPreset('flashvideo')
 		.toFormat('matroska')
-		.addOptions( [data.audio_transcode, data.video_transcode] )
+		.addOptions( ['-strict', 'experimental', data.audio_transcode, data.video_transcode] )
 		//.withVideoCodec('copy')
 		//.withAudioCodec('copy')
 		// save to stream

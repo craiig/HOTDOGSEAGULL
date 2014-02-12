@@ -87,7 +87,7 @@ var is_compatibile = function(file, callback){
 				obj.audio = 1;
 				obj.audio_transcode = "-acodec copy"
 				} else {
-				obj.audio_transcode = "-acodec libfaac -q:a 100"
+				obj.audio_transcode = "-acodec aac -q:a 100"
 				}
 			}
 		}
