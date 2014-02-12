@@ -10,6 +10,6 @@
   { "express" : ">=3.4.8",
   	"dot" : ">=1.0.2",
   	"node-ffprobe" :  ">=1.2.2",
-  	"fluent-ffmpeg" : "git://github.com/schaermu/node-fluent-ffmpeg"
+  	"fluent-ffmpeg" : ">=1.5.2"
   }
 }
