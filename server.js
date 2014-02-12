@@ -29,7 +29,7 @@ app.use('/static', express.static(__dirname + '/static'));
 app.use('/static_media', express.static( path.resolve(__dirname, media_folder) ));
 
 app.get('/', function(req, res){
-	chromecast.read_dir(media_folder, "/", function(files){
+	chromecast.read_dir(media_folder, "/", false, function(files){
 		res.render('index.html', {files: files, dir: media_folder})	
 	})
 });
@@ -38,7 +38,7 @@ app.get('/viewfolder', function(req, res){
 	dir = path.join("/", req.query.f)
 	//res.send(dir)
 	parentdir = path.join(dir, "../")
-	chromecast.read_dir(media_folder, dir, function(files){
+	chromecast.read_dir(media_folder, dir, false, function(files){
 		res.render('index.html', {files: files, dir: dir, parentdir: parentdir})	
 	})
 });

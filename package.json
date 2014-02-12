@@ -1,5 +1,5 @@
 { "name" : "HOTDOGSEAGULL"
-, "version" : "0.2.0"
+, "version" : "0.2.1"
 , "description" : "A server that casts local media to a chromecast"
 , "main" : "server.js"
 , "repository" :

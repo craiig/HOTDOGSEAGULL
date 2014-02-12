@@ -110,7 +110,7 @@ var is_compatibile = function(file, callback){
 	});	
 }
 
-var read_dir = function(basedir, dir, callback){
+var read_dir = function(basedir, dir, return_compat, callback){
 	//calls callback with an array of files
 	//containing the stats of the file as well as the chromecast compatibility
 	var response_obj = {}
@@ -152,8 +152,8 @@ var read_dir = function(basedir, dir, callback){
 			});
 		};
 
-	if(to_check.length > 0){
-		append_compat(to_check.pop());
+	if(return_compat && to_check.length > 0){
+			append_compat(to_check.pop());
 	} else {
 		callback(response_obj);
 	}

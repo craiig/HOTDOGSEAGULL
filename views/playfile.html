@@ -55,7 +55,11 @@ todo: properly mirror volume control via session information
   </div>
 
 <div class="debug_buttons">
-		<button onclick="selectMedia(file); loadAndPlayMedia()">Load &amp; play {{=it.file_name}}</button>
+		<button onclick="selectMedia(file); loadAndPlayMedia()">Load &amp; play {{=it.file_name}}</button>{{? it.compatible }}
+        (Compatible)
+      {{??}}
+        (Not Compatible)
+      {{?}}
 		<br>
 		<button onclick="selectMedia(transcode); loadAndPlayMedia()">Transcode &amp; Load &amp; play {{=it.file_name}}</button>
         <br>
