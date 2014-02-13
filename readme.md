@@ -59,7 +59,7 @@ Here's what I'm working on:
  * Offline/batch transcoding support using ffmpeg (and then maybe online transcoding)
 
 ## API ##
-This module supports a basic API so that you can add compatibility checking and transcoding to your own node programs. 
+This module supports a basic API so that you can add compatibility checking and transcoding to your own node programs. Please feel free to give me some feedback on what you'd like to see from an API. Ideally many people can use this to get the server-side media features for the chromecast. I'm also looking into ways of supporting the javascript needed for the chromecast as well.
 
 ```
 npm install https://github.com/craiig/HOTDOGSEAGULL/archive/master.tar.gz
