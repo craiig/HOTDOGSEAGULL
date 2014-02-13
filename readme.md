@@ -60,14 +60,13 @@ Here's what I'm working on:
 
 ## API ##
 This module supports a basic API so that you can add compatibility checking and transcoding to your own node programs. 
-On the command line:
+
 ```
 npm install https://github.com/craiig/HOTDOGSEAGULL/archive/master.tar.gz
 ```
 
 ```javascript
 chromecast = require('HOTDOGSEAGULL')
-
 filename = ...
 
 //retrieve chromecast compatibility information
