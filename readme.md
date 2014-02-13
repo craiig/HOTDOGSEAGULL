@@ -59,13 +59,13 @@ Here's what I'm working on:
  * Offline/batch transcoding support using ffmpeg (and then maybe online transcoding)
 
 ## API ##
-This module supports a basic API so that you can add compatibility checking to your own node programs. 
+This module supports a basic API so that you can add compatibility checking and transcoding to your own node programs. 
 On the command line:
 ```
 npm install https://github.com/craiig/HOTDOGSEAGULL/archive/master.tar.gz
 ```
 
-```
+```javascript
 chromecast = require('HOTDOGSEAGULL')
 
 filename = ...
