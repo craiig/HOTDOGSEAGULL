@@ -58,7 +58,7 @@ Here's what I'm working on:
  * DLNA support (if possible)
  * Offline/batch transcoding support using ffmpeg (and then maybe online transcoding)
 
- ## API ##
+## API ##
 This module supports a basic API so that you can add compatibility checking to your own node programs. 
 On the command line:
 ```
