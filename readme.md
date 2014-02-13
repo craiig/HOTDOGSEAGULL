@@ -87,7 +87,8 @@ app.get('/transcode', function(req, res) {
 	filename = ...
 	options = {}; //list of options for transcoding, see the source for more details
 	ffmpeg_flags = ""; //pass flags directly to ffmpeg
-	chromecast.transcode_stream(filename, res, options, "", function(err, ffmpeg_error_code, ffmpeg_output){
+	chromecast.transcode_stream(filename, res, options, "", 
+	  function(err, ffmpeg_error_code, ffmpeg_output){
 		if(err){
 			console.log("transcode error:");
 			console.log(ffmpeg_output);
