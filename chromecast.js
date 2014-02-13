@@ -1,8 +1,5 @@
-// functions to help determine which files are compatible with the chromecast
-// uses ffprobe to read media files
-
-//todo:
-//test on large libraries for any timeout issues
+// module that allows you to determine if a file is natively supported by the chromecast
+// also supports transcoding of a file
 
 // Chromecast Media Player officially supports:
 // Video codecs: H.264 High Profile Level 4.1, 4.2 and 5, VP8
@@ -12,9 +9,10 @@
 //
 // Unofficial support:
 // Video: h264 level 3.1
-// Containers: MKV (presented as mp4)
+// Containers: MKV (webm)
 
 var probe = require('node-ffprobe');
+var ffmpeg = require('fluent-ffmpeg');
 var path = require('path');
 var fs = require('fs');
 
@@ -46,7 +44,7 @@ var probe_check_cache = function(file, callback){
 	}
 }
 
-var is_compatibile = function(file, callback){
+var get_file_data = function(file, callback){
 	//callback is: function(compatibility, data)
 	//where data gives specifics about what is and isn't compatible
 	//includes the output from ffprobe under ffprobe_data
@@ -57,6 +55,12 @@ var is_compatibile = function(file, callback){
 			video: 0,
 			container: 0,
 			ffprobe_data: undefined
+		}
+
+		//check for subtitles file
+		subtitle_file = path.join(path.dirname(file), path.basename(file, path.extname(file)) + ".srt")
+		if(fs.existsSync(subtitle_file)){
+			obj.subtitle_file = subtitle_file;
 		}
 
 		if(probeData == undefined){
@@ -110,9 +114,10 @@ var is_compatibile = function(file, callback){
 	});	
 }
 
-var read_dir = function(basedir, dir, return_compat, callback){
-	//calls callback with an array of files
-	//containing the stats of the file as well as the chromecast compatibility
+var get_dir_data = function(basedir, dir, return_compat, callback){
+	//reads a directory
+	//calls callback( files ) with an associative array of files
+	//if return_compat is true, it also returns results of get_file_info()
 	var response_obj = {}
 	var to_check = [];
 
@@ -140,7 +145,7 @@ var read_dir = function(basedir, dir, return_compat, callback){
 
 	var append_compat = function(file){
 			console.log("checking compatbility: basedir: "+basedir+" file: "+file)
-			is_compatibile(path.join(basedir, file), function(compat, data){
+			get_file_data(path.join(basedir, file), function(compat, data){
 				response_obj[file].compatibility_data = data;
 				response_obj[file].compatible = compat;
 
@@ -159,8 +164,61 @@ var read_dir = function(basedir, dir, return_compat, callback){
 	}
 }
 
+var transcode_stream = function(file, res, options, ffmpeg_options, callback){
+	/* runs transcoding on file, streaming it out via the res object
+	  options provides some functionality:
+	  ffmpeg_options should be a string that will get passed directly to ffmpeg (see below)
+	  callback(err, ffmpeg_exit_code, ffmpeg_output);will be called when transcode is finished, 
+	  	err will be True if there was an error, and error_string will contain whatever ffmpeg complained about
+
+	  supported options:
+	  		{
+				'use_subtitles' : 0,
+				'subtitle_path' : "something.srt" //optional, uses <filename>.srt if not provided
+				'audio_track' : 
+	  		}
+	*/
+	res.contentType('video/mp4');
+
+	get_file_data(pathToMovie, function(compat, data){
+
+		opts = ['-strict experimental', data.audio_transcode, data.video_transcode]
+		if(options.use_subtitles){
+			//todo, need to check if this version of ffmpeg supports subs before enabling
+			/*if(data.subtitle_file){ //if there is a valid subtitle file
+			opts.push("-vf subtitles=" + data.subtitle_file);
+			}*/
+		}
+
+		console.log("calling transcode with options: "+opts)
+		var proc = new ffmpeg({ source: pathToMovie, nolog: true, timeout: 0 })
+		.toFormat('matroska')
+		.addOptions( opts )
+		//.withVideoCodec('copy')
+		//.withAudioCodec('copy')
+		// save to stream
+		/*.onProgress(function(progress) {
+		    console.log(progress);
+		  })*/
+		.writeToStream(res, function(retcode, ffmpeg_output){
+			//console.log('transcoding finished: '+retcode); //+" error: "+error);
+
+			err = 0;
+			if(retcode == 255){ 
+				//retcode seems like transcoding was terminated early by node, which is fine
+			} else if (retcode == 1){
+				//genuine error
+				err = 1;
+			}
+
+			callback(err, retcode, ffmpeg_output);
+		});
+
+	});
+}
+
 module.exports = {
-  is_compatibile: is_compatibile,
-  read_dir: read_dir,
-  //transcode_recommendation: transcode_recommendation
+  get_file_data: get_file_data,
+  get_dir_data: get_dir_data,
+  transcode_stream : transcode_stream
 }

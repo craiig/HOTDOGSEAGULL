@@ -1,7 +1,11 @@
 { "name" : "HOTDOGSEAGULL"
 , "version" : "0.2.1"
 , "description" : "A server that casts local media to a chromecast"
-, "main" : "server.js"
+, "keywords" : "chromecast streaming"
+, "homepage" : "https://github.com/craiig/HOTDOGSEAGULL"
+, "bugs" : "https://github.com/craiig/HOTDOGSEAGULL"
+, "license" : "Apache-2.0"
+, "main" : "chromecast.js"
 , "repository" :
   { "type" : "git"
   , "url" : "https://github.com/craiig/HOTDOGSEAGULL"

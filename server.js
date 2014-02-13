@@ -5,7 +5,6 @@ var fs = require('fs');
 var dot = require('dot');
 var express = require('express');
 var path = require('path')
-var ffmpeg = require('fluent-ffmpeg');
 
 var app = express();
 
@@ -22,6 +21,8 @@ app.engine('html', function(path, options, callback){
 	});
 })
 
+app.set("views", path.join(__dirname + "/views"))
+
 app.use(express.logger());
 
 app.use('/static', express.static(__dirname + '/static'));
@@ -29,7 +30,7 @@ app.use('/static', express.static(__dirname + '/static'));
 app.use('/static_media', express.static( path.resolve(__dirname, media_folder) ));
 
 app.get('/', function(req, res){
-	chromecast.read_dir(media_folder, "/", false, function(files){
+	chromecast.get_dir_data(media_folder, "/", false, function(files){
 		res.render('index.html', {files: files, dir: media_folder})	
 	})
 });
@@ -38,7 +39,7 @@ app.get('/viewfolder', function(req, res){
 	dir = path.join("/", req.query.f)
 	//res.send(dir)
 	parentdir = path.join(dir, "../")
-	chromecast.read_dir(media_folder, dir, false, function(files){
+	chromecast.get_dir_data(media_folder, dir, false, function(files){
 		res.render('index.html', {files: files, dir: dir, parentdir: parentdir})	
 	})
 });
@@ -47,7 +48,7 @@ app.get('/playfile', function(req, res){
 	file_url = path.join("/static_media", req.query.f)
 	transcode_url = path.join("/transcode?f=", req.query.f)
 
-	chromecast.is_compatibile(path.join(media_folder, req.query.f), function(compat, data){
+	chromecast.get_file_data(path.join(media_folder, req.query.f), function(compat, data){
 		res.render('playfile.html', {
 			query: req.query, 
 			file_url: file_url,
@@ -61,26 +62,17 @@ app.get('/playfile', function(req, res){
 });
 
 app.get('/transcode', function(req, res) {
-	res.contentType('video/mp4');
-
 	// borrowed from the  ffmpeg-fluent examples
 	pathToMovie = path.join(media_folder, req.query.f)
 
-	chromecast.is_compatibile(pathToMovie, function(compat, data){
-
-		console.log("calling transcode with options: "+[data.audio_transcode, data.video_transcode])
-		var proc = new ffmpeg({ source: pathToMovie, nolog: true, timeout: 0 })
-		// use the 'flashvideo' preset (located in /lib/presets/flashvideo.js)
-		//.usingPreset('flashvideo')
-		.toFormat('matroska')
-		.addOptions( ['-strict', 'experimental', data.audio_transcode, data.video_transcode] )
-		//.withVideoCodec('copy')
-		//.withAudioCodec('copy')
-		// save to stream
-		.writeToStream(res, function(retcode, error){
-		console.log('transcoding finished: '+retcode+" error: "+error);
-		});
-
+	chromecast.transcode_stream(pathToMovie, res, {}, "", function(err, ffmpeg_error_code, ffmpeg_output){
+		if(err){
+			console.log("transcode error:");
+			console.log(ffmpeg_output);
+		} else {
+			console.log("transcoding finished ffmpeg_output: ");
+			console.log(ffmpeg_output);
+		}
 	});
  
 });

@@ -8,11 +8,12 @@ Tested on OS X but should work on anything that can run node and ffmpeg.
 
 ## Features ##
  * Uses the default media player app on the Chromecast - no need to get a developer ID or publish an app.
- * Detects which of your local files are playable by the chromecast using ffmpeg - no need to guess.
+ * Detects which of your local files are fully compatible with the chromecast using ffmpeg
  * Optional on-the-fly transcoding that only transcodes the streams that need it. (I.e. audio/video that is already compatible will not be transcoded.)
  * Extremely basic UI. Uses templates so adding skins and customizing should be easier.
+ * API so you can use transcoding and compatibility checking in your own app! (See below)
  * Lets you try files anyways just in case detection got it wrong. (Let me know when detection is wrong).
- * Lots of debugging output (lol?)
+ * Lots of debugging output
  * Ridiculous name
 
 ## Installation ##
@@ -56,6 +57,43 @@ Here's what I'm working on:
  * Subtitles
  * DLNA support (if possible)
  * Offline/batch transcoding support using ffmpeg (and then maybe online transcoding)
+
+ ## API ##
+This module supports a basic API so that you can add compatibility checking to your own node programs. 
+```
+chromecast = require('HOTDOGSEAGULL')
+
+filename = ...
+
+//retrieve chromecast compatibility information
+chromecast.get_file_data(filename,
+	function(compatible, compat_data){
+		if(compatible){
+			console.log("File is fully compatible");
+		} else {
+			console.log("File needs some transcoding");
+		}
+		console.log(compat_data);	
+	});
+
+//set up a route that transcodes the files
+//note: make sure to set up a static route so you can serve files that are fully compatible
+app.get('/transcode', function(req, res) {
+	filename = ...
+	options = {}; //list of options for transcoding, see the source for more details
+	ffmpeg_flags = ""; //pass flags directly to ffmpeg
+	chromecast.transcode_stream(filename, res, options, "", function(err, ffmpeg_error_code, ffmpeg_output){
+		if(err){
+			console.log("transcode error:");
+			console.log(ffmpeg_output);
+		} else {
+			console.log("transcoding finished ffmpeg_output: ");
+			console.log(ffmpeg_output);
+		}
+	});
+ 
+});
+```
 
 ## License ##
 I used some code from Google's CastHelloVideo-chrome which are under the Apache 2.0 License. https://github.com/googlecast/CastHelloVideo-chrome
