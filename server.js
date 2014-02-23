@@ -65,7 +65,15 @@ app.get('/transcode', function(req, res) {
 	// borrowed from the  ffmpeg-fluent examples
 	pathToMovie = path.join(media_folder, req.query.f)
 
-	chromecast.transcode_stream(pathToMovie, res, {}, "", function(err, ffmpeg_error_code, ffmpeg_output){
+	options = { }
+	if(req.query.audiotrack){
+		options.audiotrack = req.query.audiotrack
+	}
+	if(req.query.videotrack){
+		options.videotrack = req.query.videotrack
+	}
+
+	chromecast.transcode_stream(pathToMovie, res, options, "", function(err, ffmpeg_error_code, ffmpeg_output){
 		if(err){
 			console.log("transcode error:");
 			console.log(ffmpeg_output);

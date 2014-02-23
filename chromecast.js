@@ -72,6 +72,8 @@ var get_file_data = function(file, callback){
 		/*console.log("--")
 		console.log(probeData)
 		console.log("--")*/
+		track_audio = 0;
+		track_video = 0;
 		for(i in probeData.streams){
 			stream = probeData.streams[i]
 			if(stream.codec_type == 'video'){
@@ -80,19 +82,25 @@ var get_file_data = function(file, callback){
 					&& (stream.level == 31 || stream.level == 41 || stream.level == 42 || stream.level == 5 || stream.level == 50)
 					){
 						obj.video = 1;
-						obj.video_transcode = "-vcodec copy"
+						stream.chromecast_compat = 1;
+						stream.video_transcode = "-vcodec copy";
 				} else {
-					obj.video_transcode = "-vcodec libx264 -profile:v high -level 5.0"
+					stream.chromecast_compat = 0;
+					stream.video_transcode = "-vcodec libx264 -profile:v high -level 5.0";
 				}
+				stream.transcode_track_id = track_video++;
 			}
 
 			if(stream.codec_type == 'audio'){
 				if( (stream.codec_name == 'aac' || stream.codec_name == 'mp3' || stream.codec_name == 'vorbis' || stream.codec_name == 'opus') ){
-				obj.audio = 1;
-				obj.audio_transcode = "-acodec copy"
+					obj.audio = 1;
+					stream.chromecast_compat = 1;
+					stream.audio_transcode = "-acodec copy";
 				} else {
-				obj.audio_transcode = "-acodec aac -q:a 100"
+					stream.chromecast_compat = 0;
+					stream.audio_transcode = "-acodec aac -q:a 100";
 				}
+				stream.transcode_track_id = track_audio++;
 			}
 		}
 
@@ -173,22 +181,51 @@ var transcode_stream = function(file, res, options, ffmpeg_options, callback){
 
 	  supported options:
 	  		{
+	  			'audiotrack' : 0 // number corresponding to the 'transcode_track_id' member from get_file_data()
+	  			'videotrack' : 0 //same as audiotrack
+	  			//coming soon: 
 				'use_subtitles' : 0,
 				'subtitle_path' : "something.srt" //optional, uses <filename>.srt if not provided
-				'audio_track' : 
 	  		}
 	*/
 	res.contentType('video/mp4');
 
+	console.log(options)
+
 	get_file_data(pathToMovie, function(compat, data){
 
-		opts = ['-strict experimental', data.audio_transcode, data.video_transcode]
-		if(options.use_subtitles){
-			//todo, need to check if this version of ffmpeg supports subs before enabling
-			/*if(data.subtitle_file){ //if there is a valid subtitle file
-			opts.push("-vf subtitles=" + data.subtitle_file);
-			}*/
+		//figure out if a track has been selected from the options
+		if(options.audiotrack == undefined)
+			options.audiotrack = 0;
+
+		if(options.videotrack == undefined)
+			options.videotrack = 0;
+
+		opts = ['-strict experimental'];
+
+		//scan the streams to find the selected ones
+		for(var i in data.ffprobe_data.streams){
+			var stream = data.ffprobe_data.streams[i];
+
+			if(stream.codec_type == 'audio' && stream.transcode_track_id == options.audiotrack){
+						opts.push("-map a:" + stream.transcode_track_id);
+						opts.push(stream.audio_transcode);
+			}
+			else if(stream.codec_type == 'video' && stream.transcode_track_id == options.videotrack){
+						opts.push("-map v:" + stream.transcode_track_id);
+						opts.push(stream.video_transcode);
+			}
 		}
+		//todo: error if the selected stream number
+
+		/*if(options.use_subtitles){
+			//todo, need to check if this version of ffmpeg supports subs before enabling
+			if(data.subtitle_file){ //if there is a valid subtitle file
+				//escaped_subs = data.subtitle_file.replace(" ", "\\ ");
+				escaped_subs = data.subtitle_file.replace(/\s/g, "\\\\ ");
+				opts.push("-vf subtitles=" + escaped_subs + "");
+			}
+		}*/
 
 		console.log("calling transcode with options: "+opts)
 		var proc = new ffmpeg({ source: pathToMovie, nolog: true, timeout: 0 })

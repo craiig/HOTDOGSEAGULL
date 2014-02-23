@@ -6,10 +6,13 @@ This is intended as a starting point for UNIX inclined people to set up local me
 
 Tested on OS X but should work on anything that can run node and ffmpeg.
 
+Verified to work even on a Raspberry Pi when files are fully compatible (i.e. no transcoding needs to be done).
+
 ## Features ##
  * Uses the default media player app on the Chromecast - no need to get a developer ID or publish an app.
  * Detects which of your local files are fully compatible with the chromecast using ffmpeg
- * Optional on-the-fly transcoding that only transcodes the streams that need it. (I.e. audio/video that is already compatible will not be transcoded.)
+ * On-the-fly transcoding that only re-encodes the streams that need it. (I.e. audio/video that is already compatible will not be transcoded.). 
+ * Ability to select alternative audio/video tracks when using transcoding.
  * Extremely basic UI. Uses templates so adding skins and customizing should be easier.
  * API so you can use transcoding and compatibility checking in your own app! (See below)
  * Lets you try files anyways just in case detection got it wrong. (Let me know when detection is wrong).

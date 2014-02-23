@@ -33,7 +33,7 @@ todo: properly mirror volume control via session information
   <p><a href="/viewfolder?f={{=it.file_dir}}">Back to directory</a></p>
 
   <p>Direct URL to media: <a href="{{=it.file_url}}">{{=it.file_url}}</a></p>
-  <p>Direct URL to transcode: <a href="{{=it.transcode_url}}">{{=it.transcode_url}}</a></p>
+  <p>Direct URL to transcode: <a href="{{=it.transcode_url}}" id='transcodeurl'>{{=it.transcode_url}}</a></p>
 
 <h2>Player Controls</h2>
   <div id="currentlyplaying">Currently Playing: <span id='currentmedianame'>Nothing</span></div>
@@ -61,13 +61,45 @@ todo: properly mirror volume control via session information
         (Not Compatible)
       {{?}}
 		<br>
-		<button onclick="selectMedia(transcode); loadAndPlayMedia()">Transcode &amp; Load &amp; play {{=it.file_name}}</button>
+		<button onclick="selectMedia(getTranscodeUrl()); loadAndPlayMedia()">Transcode &amp; Load &amp; play {{=it.file_name}}</button>
         <br>
 
         <button id="playpauseresume" onclick="playMedia()">Play</button>
         <button id="playpauseresume" onclick="stopMedia()">Stop</button>
 </div>  
 
+
+<h2>Transcoding Options</h2>
+
+</p>Video Track:
+<select name="videotrack" id="videotrack" onchange="setTranscodeDirectUrl();">
+{{ for(var i in it.compatibility_data.ffprobe_data.streams ){ }}
+  {{ var stream = it.compatibility_data.ffprobe_data.streams[i]; }}
+  {{? stream.codec_type == 'video' }}
+  <option value="{{=stream.transcode_track_id}}">Stream {{= i }}
+    {{? stream['TAG:language'] }}
+      {{= stream['TAG:language'] }}
+    {{?}}
+    {{= stream.codec_name }}
+  </option>
+  {{?}}
+{{ } }}
+</select></p>
+
+</p>Audio Track:
+<select name="audiotrack" id="audiotrack" onchange="setTranscodeDirectUrl();">
+{{ for(var i in it.compatibility_data.ffprobe_data.streams ){ }}
+  {{ var stream = it.compatibility_data.ffprobe_data.streams[i]; }}
+  {{? stream.codec_type == 'audio' }}
+  <option value="{{=stream.transcode_track_id}}">Stream {{= i }}
+    {{? stream['TAG:language'] }}
+      {{= stream['TAG:language'] }}
+    {{?}}
+    {{= stream.codec_name }}
+  </option>
+  {{?}}
+{{ } }}
+</select></p>
 
 <h2>Debug Controls</h2>
    <div class="debug_buttons">
@@ -104,9 +136,21 @@ todo: properly mirror volume control via session information
   </div>
 
 <script type="text/javascript">
+  function setTranscodeDirectUrl(){
+    document.getElementById("transcodeurl").innerHTML = getTranscodeUrl();
+    document.getElementById("transcodeurl").href = getTranscodeUrl();
+  }
+
+  function getTranscodeUrl(){
+    var transcode = document.location.origin + '{{= it.transcode_url.replace("'", "\\'") }}';
+    transcode += "&audiotrack=" + document.getElementById("audiotrack").value;
+    transcode += "&videotrack=" + document.getElementById("videotrack").value;
+    return transcode;
+  }
+
 	var file = document.location.origin + '{{= it.file_url.replace("'", "\\'") }}';
-	var transcode = document.location.origin + '{{= it.transcode_url.replace("'", "\\'") }}';
 	selectMedia(file);
+  setTranscodeDirectUrl();
 </script>
 </body>
 </html>
