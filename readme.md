@@ -27,7 +27,7 @@ Depends on node packages: express, dot, node-ffprobe, fluent-ffmpeg
 ```
 git clone https://github.com/craiig/HOTDOGSEAGULL
 cd HOTDOGSEAGULL
-brew install ffmpeg
+brew install ffmpeg --with-libass --enable-libx264
 npm install
 edit 'media_folder' variable in server.js to point to your media directory
 node server.js
