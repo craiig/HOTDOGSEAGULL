@@ -20,7 +20,7 @@ Verified to work even on a Raspberry Pi when files are fully compatible (i.e. no
  * Ridiculous name
 
 ## Installation ##
-Depends on ffprobe that's provided by ffmpeg. You can install this using Homebrew or whatever package manager you have on your system. If you have issues with transcoding, check the ffmpeg configuration section for the flags you need.
+Depends on ffmpeg and ffprobe (provided by ffmpeg). You can install this using Homebrew or whatever package manager you have on your system. If you have issues with transcoding, check the ffmpeg configuration section for the flags you need.
 
 Depends on node packages: express, dot, node-ffprobe, fluent-ffmpeg
 
