@@ -7,9 +7,9 @@
 // Image formats: BMP, GIF, JPEG, PNG, WEBP
 // Containers: MP4, WebM
 //
-// Unofficial support:
-// Video: h264 level 3.1
-// Containers: MKV (webm)
+// Unofficial support discovered via testing: 
+// Video: h264 level 3.1, 5.1
+// Containers: MKV (present as webm)
 
 var probe = require('node-ffprobe');
 var ffmpeg = require('fluent-ffmpeg');
@@ -44,6 +44,16 @@ var probe_check_cache = function(file, callback){
 	}
 }
 
+var get_video_encode = function(){
+	//returns the default video encoding format for the chromecast
+	return "-vcodec libx264 -profile:v high -level 5.0";
+}
+
+var get_audio_encode = function(){
+	//returns the default audio encoding format for the chromecast
+	return "-acodec aac -q:a 100";
+}
+
 var get_file_data = function(file, callback){
 	//callback is: function(compatibility, data)
 	//where data gives specifics about what is and isn't compatible
@@ -57,21 +67,30 @@ var get_file_data = function(file, callback){
 			ffprobe_data: undefined
 		}
 
-		//check for subtitles file
-		subtitle_file = path.join(path.dirname(file), path.basename(file, path.extname(file)) + ".srt")
-		if(fs.existsSync(subtitle_file)){
-			obj.subtitle_file = subtitle_file;
-		}
-
+		//error check and abort
 		if(probeData == undefined){
 			callback(0, obj);
 			return
 		}
 		obj.ffprobe_data = probeData;
 
+		//check for subtitles file
+		//add it to the file info
+		subtitle_extensions = [".srt", ".ass"]
+		for (i in subtitle_extensions){
+			var ext = subtitle_extensions[i];
+			subtitle_file = path.join(path.dirname(file), path.basename(file, path.extname(file)) + ext)
+			if(fs.existsSync(subtitle_file)){
+				obj.subtitle_file = path.basename(subtitle_file);
+				break;
+			}
+		}
+
 		/*console.log("--")
 		console.log(probeData)
 		console.log("--")*/
+
+		//Examine streams and recommend transcoding if needed
 		track_audio = 0;
 		track_video = 0;
 		for(i in probeData.streams){
@@ -79,14 +98,14 @@ var get_file_data = function(file, callback){
 			if(stream.codec_type == 'video'){
 				if(stream.codec_name == 'h264' 
 					&& stream.profile == 'High'
-					&& (stream.level == 31 || stream.level == 41 || stream.level == 42 || stream.level == 5 || stream.level == 50)
+					&& (stream.level == 31 || stream.level == 41 || stream.level == 42 || stream.level == 5 || stream.level == 50 || stream.level == 51)
 					){
 						obj.video = 1;
 						stream.chromecast_compat = 1;
 						stream.video_transcode = "-vcodec copy";
 				} else {
 					stream.chromecast_compat = 0;
-					stream.video_transcode = "-vcodec libx264 -profile:v high -level 5.0";
+					stream.video_transcode = get_video_encode(); //get default encoding for chromecast
 				}
 				stream.transcode_track_id = track_video++;
 			}
@@ -98,7 +117,7 @@ var get_file_data = function(file, callback){
 					stream.audio_transcode = "-acodec copy";
 				} else {
 					stream.chromecast_compat = 0;
-					stream.audio_transcode = "-acodec aac -q:a 100";
+					stream.audio_transcode = get_audio_encode(); //get default encoding for chromecast
 				}
 				stream.transcode_track_id = track_audio++;
 			}
@@ -114,6 +133,7 @@ var get_file_data = function(file, callback){
 			obj.container = 1;
 		}
 
+		//return full compatibility
 		compat = 0
 		if(obj.audio == 1 && obj.video==1 && obj.container == 1){
 			compat = 1;
@@ -213,19 +233,26 @@ var transcode_stream = function(file, res, options, ffmpeg_options, callback){
 			}
 			else if(stream.codec_type == 'video' && stream.transcode_track_id == options.videotrack){
 						opts.push("-map v:" + stream.transcode_track_id);
-						opts.push(stream.video_transcode);
+
+						if(options.subtitle_path){
+							//need to use full video encoding with subtitles
+							opts.push( get_video_encode() );
+						} else {
+							opts.push(stream.video_transcode);
+						}
 			}
 		}
-		//todo: error if the selected stream number
+		//todo: error if any selected stream number is not valid
 
-		/*if(options.use_subtitles){
-			//todo, need to check if this version of ffmpeg supports subs before enabling
-			if(data.subtitle_file){ //if there is a valid subtitle file
-				//escaped_subs = data.subtitle_file.replace(" ", "\\ ");
-				escaped_subs = data.subtitle_file.replace(/\s/g, "\\\\ ");
-				opts.push("-vf subtitles=" + escaped_subs + "");
-			}
-		}*/
+		//handle subtitles
+		subtitle_arg = ""
+		subtitle_opt = ""
+		if(options.subtitle_path){
+			//todo: need to check if this version of ffmpeg supports subs before enabling
+			escaped_subs = options.subtitle_path;
+			subtitle_arg = "-vf"
+			subtitle_opt = "subtitles=" + escaped_subs
+		}
 
 		console.log("calling transcode with options: "+opts)
 		var proc = new ffmpeg({ source: pathToMovie, nolog: true, timeout: 0 })
@@ -237,7 +264,12 @@ var transcode_stream = function(file, res, options, ffmpeg_options, callback){
 		/*.onProgress(function(progress) {
 		    console.log(progress);
 		  })*/
-		.writeToStream(res, function(retcode, ffmpeg_output){
+		
+		if(subtitle_arg != ""){
+			proc.addOption( subtitle_arg, subtitle_opt ) //have to add subtitle arg separately to deal with spaces
+		}
+
+		proc.writeToStream(res, function(retcode, ffmpeg_output){
 			//console.log('transcoding finished: '+retcode); //+" error: "+error);
 
 			err = 0;

@@ -1,6 +1,6 @@
 
 # HOTDOGSEAGULL #
-This is a server built in node.js that lets you browse your media using a browser and push it up to a chromecast. Should be suitable for running on a home server.
+This is a server built in node.js that lets you browse your media using a browser and push it up to a chromecast. Should be suitable for running on a home server. 
 
 This is intended as a starting point for UNIX inclined people to set up local media servers for the chromecast. The UI intentionally looks bad because I want to leave the UI to others while I focus on the technical aspects. If you make any improvements to this code, feel free to send a pull request. See below for more details on future development 
 
@@ -11,8 +11,8 @@ Verified to work even on a Raspberry Pi when files are fully compatible (i.e. no
 ## Features ##
  * Uses the default media player app on the Chromecast - no need to get a developer ID or publish an app.
  * Detects which of your local files are fully compatible with the chromecast using ffmpeg
- * On-the-fly transcoding that only re-encodes the streams that need it. (I.e. audio/video that is already compatible will not be transcoded.). 
- * Ability to select alternative audio/video tracks when using transcoding.
+ * Transcoding that only re-encodes the streams that need it. (I.e. audio/video that is already compatible will not be transcoded.).
+ * External subtitles (ass,srt) and audio/video track selection when using transcoding.
  * Extremely basic UI. Uses templates so adding skins and customizing should be easier.
  * API so you can use transcoding and compatibility checking in your own app! (See below)
  * Lets you try files anyways just in case detection got it wrong. (Let me know when detection is wrong).
@@ -20,7 +20,7 @@ Verified to work even on a Raspberry Pi when files are fully compatible (i.e. no
  * Ridiculous name
 
 ## Installation ##
-Depends on ffprobe that's provided by ffmpeg. You can install this using Homebrew or whatever package manager you have on your system.
+Depends on ffprobe that's provided by ffmpeg. You can install this using Homebrew or whatever package manager you have on your system. If you have issues with transcoding, check the ffmpeg configuration section for the flags you need.
 
 Depends on node packages: express, dot, node-ffprobe, fluent-ffmpeg
 
@@ -35,14 +35,23 @@ Visit http://<local_ip>:3000 in a web browser.
 ```
 NOTE: You need to use an ip that the chromecast can access. I.e. use 192.168.1.X and don't use localhost.
 
+### FFmpeg configuration ###
+I've tested this with ffmpeg 1.2.4. If you are having issues with transcoding, particularly subs, you should ensure your ffmpeg version has been compiled with the following flags: *--enable-libass --enable-libx264*. Run *ffmpeg -version* to see what options it has been built with. 
+
+**OS X Users**: Homebrew does not include the subtitle library by default. Install ffmpeg with the following command: *brew install ffmpeg --with-libass --enable-libx264*
+
+Leave me a note if you have to recompile ffmpeg for your system and I'll make a note here for others.
+
 ## Known Issues ##
-As of Feb 9 2014:
+As of Feb 24 2014:
  * The Chromecast default media player doesn't seem to update the sender on the progress through the video. Manual status changes, such as pausing, muting, etc will cause the progress to get updated. This is also an issue in Google's CastHelloVideo, so I'm not sure if it's just not currently possible or I'm not adding a listener in the right places.
+ * Skipping while transcoding is not supported. I'm looking into ways to make this work.
+ * FFmpeg cannot handle hardcoding subtitles from internal streams. You'll need to extract your subs to an external file beforehand. Drop me a line
 
 ## Warranty & Support ##
 This server might be very insecure and may leak all your files. Security audits/fixes are more than welcome. For the love of god put this behind a firewall.
 
-Make posts in the github forum if you have problems.
+Make posts in the github issue tracker if you have problems.
 
 ## Upcoming features & Contributing ##
 To contribute, just send a pull request on github and I'll look at it. Bugs, new features, better UI, it's all welcome but I don't guarantee I'll accept everything.
@@ -57,9 +66,8 @@ Here are some features that would be good to add:
 Here's what I'm working on:
  * Improving the player interaction with the chromecast
  * Play whole directory
- * Subtitles
  * DLNA support (if possible)
- * Offline/batch transcoding support using ffmpeg (and then maybe online transcoding)
+ * Offline transcoding support
 
 ## API ##
 This module supports a basic API so that you can add compatibility checking and transcoding to your own node programs. Please feel free to give me some feedback on what you'd like to see from an API. Ideally many people can use this to get the server-side media features for the chromecast. I'm also looking into ways of supporting the javascript needed for the chromecast as well.

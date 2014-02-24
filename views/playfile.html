@@ -32,10 +32,8 @@ todo: properly mirror volume control via session information
   <h1>{{=it.file_name}}</h1>
   <p><a href="/viewfolder?f={{=it.file_dir}}">Back to directory</a></p>
 
-  <p>Direct URL to media: <a href="{{=it.file_url}}">{{=it.file_url}}</a></p>
-  <p>Direct URL to transcode: <a href="{{=it.transcode_url}}" id='transcodeurl'>{{=it.transcode_url}}</a></p>
-
 <h2>Player Controls</h2>
+<p>Direct URL to media: <a href="{{=it.file_url}}">{{=it.file_url}}</a></p>
   <div id="currentlyplaying">Currently Playing: <span id='currentmedianame'>Nothing</span></div>
   <div class="playerstate">
     State : <span id="playerstate">IDLE</span>
@@ -55,28 +53,30 @@ todo: properly mirror volume control via session information
   </div>
 
 <div class="debug_buttons">
-		<button onclick="selectMedia(file); loadAndPlayMedia()">Load &amp; play {{=it.file_name}}</button>{{? it.compatible }}
+		<button onclick="selectMedia(file); loadAndPlayMedia()">Play {{=it.file_name}}</button>{{? it.compatible }}
         (Compatible)
       {{??}}
         (Not Compatible)
       {{?}}
 		<br>
-		<button onclick="selectMedia(getTranscodeUrl()); loadAndPlayMedia()">Transcode &amp; Load &amp; play {{=it.file_name}}</button>
-        <br>
 
         <button id="playpauseresume" onclick="playMedia()">Play</button>
         <button id="playpauseresume" onclick="stopMedia()">Stop</button>
 </div>  
 
 
-<h2>Transcoding Options</h2>
+<h2>Transcoding</h2>
+  <p>Direct URL to transcode: <a href="{{=it.transcode_url}}" id='transcodeurl'>{{=it.transcode_url}}</a></p>
+
+<button onclick="selectMedia(getTranscodeUrl()); loadAndPlayMedia()">Transcode {{=it.file_name}}</button>
+        <br>
 
 </p>Video Track:
 <select name="videotrack" id="videotrack" onchange="setTranscodeDirectUrl();">
 {{ for(var i in it.compatibility_data.ffprobe_data.streams ){ }}
   {{ var stream = it.compatibility_data.ffprobe_data.streams[i]; }}
   {{? stream.codec_type == 'video' }}
-  <option value="{{=stream.transcode_track_id}}">Stream {{= i }}
+  <option value="{{=stream.transcode_track_id}}">Stream {{= i }}:
     {{? stream['TAG:language'] }}
       {{= stream['TAG:language'] }}
     {{?}}
@@ -84,14 +84,14 @@ todo: properly mirror volume control via session information
   </option>
   {{?}}
 {{ } }}
-</select></p>
+</select> <br/>
 
-</p>Audio Track:
+Audio Track:
 <select name="audiotrack" id="audiotrack" onchange="setTranscodeDirectUrl();">
 {{ for(var i in it.compatibility_data.ffprobe_data.streams ){ }}
   {{ var stream = it.compatibility_data.ffprobe_data.streams[i]; }}
   {{? stream.codec_type == 'audio' }}
-  <option value="{{=stream.transcode_track_id}}">Stream {{= i }}
+  <option value="{{=stream.transcode_track_id}}">Stream {{= i }}:
     {{? stream['TAG:language'] }}
       {{= stream['TAG:language'] }}
     {{?}}
@@ -99,7 +99,30 @@ todo: properly mirror volume control via session information
   </option>
   {{?}}
 {{ } }}
-</select></p>
+</select> <br/>
+
+Subtitles File:
+<select name="subtitles" id="subtitles" onchange="setTranscodeDirectUrl();">
+    <option value="">None</option>
+{{? it.compatibility_data.subtitle_file }}
+  <option selected value="{{=it.compatibility_data.subtitle_file}}">{{=it.compatibility_data.subtitle_file}}</option>
+{{?}}
+</select> <br/>
+
+<!-- Subtitle Track:
+<select name="subtitletrack" id="subtitletrack" onchange="setTranscodeDirectUrl();">
+{{ for(var i in it.compatibility_data.ffprobe_data.streams ){ }}
+  {{ var stream = it.compatibility_data.ffprobe_data.streams[i]; }}
+  {{? stream.codec_type == 'subtitle' }}
+  <option>Stream {{= i }}:
+    {{? stream['TAG:language'] }}
+      {{= stream['TAG:language'] }}
+    {{?}}
+    {{= stream.codec_name }}
+  </option>
+  {{?}}
+{{ } }}
+</select></p> -->
 
 <h2>Debug Controls</h2>
    <div class="debug_buttons">
@@ -145,6 +168,7 @@ todo: properly mirror volume control via session information
     var transcode = document.location.origin + '{{= it.transcode_url.replace("'", "\\'") }}';
     transcode += "&audiotrack=" + document.getElementById("audiotrack").value;
     transcode += "&videotrack=" + document.getElementById("videotrack").value;
+    transcode += "&subtitles=" + document.getElementById("subtitles").value;
     return transcode;
   }
 

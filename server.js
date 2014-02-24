@@ -72,6 +72,9 @@ app.get('/transcode', function(req, res) {
 	if(req.query.videotrack){
 		options.videotrack = req.query.videotrack
 	}
+	if(req.query.subtitles){
+		options.subtitle_path = path.join(path.dirname(pathToMovie), req.query.subtitles)
+	}
 
 	chromecast.transcode_stream(pathToMovie, res, options, "", function(err, ffmpeg_error_code, ffmpeg_output){
 		if(err){
