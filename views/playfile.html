@@ -109,6 +109,22 @@ Subtitles File:
 {{?}}
 </select> <br/>
 
+Subtitle Track:
+<select name="subtitletrack" id="subtitletrack" onchange="setTranscodeDirectUrl();">
+    <option value="" selected>None</option>
+{{ for(var i in it.compatibility_data.ffprobe_data.streams ){ }}
+  {{ var stream = it.compatibility_data.ffprobe_data.streams[i]; }}
+  {{? stream.codec_type == 'subtitle' }}
+  <option value="{{= i }}">Stream {{= i }}:
+    {{? stream['TAG:language'] }}
+      {{= stream['TAG:language'] }}
+    {{?}}
+    {{= stream.codec_name }}
+  </option>
+  {{?}}
+{{ } }}
+</select> <br/>
+
 <!-- Subtitle Track:
 <select name="subtitletrack" id="subtitletrack" onchange="setTranscodeDirectUrl();">
 {{ for(var i in it.compatibility_data.ffprobe_data.streams ){ }}
@@ -169,6 +185,7 @@ Subtitles File:
     transcode += "&audiotrack=" + document.getElementById("audiotrack").value;
     transcode += "&videotrack=" + document.getElementById("videotrack").value;
     transcode += "&subtitles=" + document.getElementById("subtitles").value;
+    transcode += "&subtitletrack=" + document.getElementById("subtitletrack").value;
     return transcode;
   }
 

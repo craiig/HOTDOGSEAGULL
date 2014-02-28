@@ -192,6 +192,44 @@ var get_dir_data = function(basedir, dir, return_compat, callback){
 	}
 }
 
+var extract_subs = function(data, options, callback){
+	//extract subtitles
+	if(options.subtitletrack){
+		var substream = data.ffprobe_data.streams[options.subtitletrack];
+		var subexts = { //map between 'codec_name' and subtitle extension
+			"ass" : "ass",
+			"subrip" : "srt",
+		}
+		subext = subexts[substream.codec_name]
+		if(subext){
+			//extract subtitle stream and pass the file to the subtitle path
+			var subfile = 'extracted_subs_' + Date.now() + '.' +subext
+			var subextract = new ffmpeg({ source: pathToMovie, nolog: true, timeout: 0 })
+			.toFormat(subext)
+			.saveToFile(subfile, function(){
+				console.log("sub extraction done");
+
+				//call transcoder
+				options.extracted_subs_file = subfile
+				options.subtitle_path = subfile
+				callback(options);
+			})
+		} else {
+			callback(options);
+		}
+	} else {
+		callback(options);
+	}
+}
+
+var cleanup_subs = function(options){
+	if(options.extracted_subs_file){
+		//clean up the extracted file
+		fs.unlinkSync(options.extracted_subs_file)
+		console.log("deleting subs file "+options.extracted_subs_file)
+	}
+}
+
 var transcode_stream = function(file, res, options, ffmpeg_options, callback){
 	/* runs transcoding on file, streaming it out via the res object
 	  options provides some functionality:
@@ -204,13 +242,13 @@ var transcode_stream = function(file, res, options, ffmpeg_options, callback){
 	  			'audiotrack' : 0 // number corresponding to the 'transcode_track_id' member from get_file_data()
 	  			'videotrack' : 0 //same as audiotrack
 	  			//coming soon: 
-				'use_subtitles' : 0,
 				'subtitle_path' : "something.srt" //optional, uses <filename>.srt if not provided
+				'subtitletrack' : 0 //optional, stream number of subtitles track
 	  		}
 	*/
 	res.contentType('video/mp4');
 
-	console.log(options)
+	console.log("Invoking transcode with options: " + options)
 
 	get_file_data(pathToMovie, function(compat, data){
 
@@ -221,69 +259,77 @@ var transcode_stream = function(file, res, options, ffmpeg_options, callback){
 		if(options.videotrack == undefined)
 			options.videotrack = 0;
 
-		opts = ['-strict experimental'];
-
-		//scan the streams to find the selected ones
-		for(var i in data.ffprobe_data.streams){
-			var stream = data.ffprobe_data.streams[i];
-
-			if(stream.codec_type == 'audio' && stream.transcode_track_id == options.audiotrack){
-						opts.push("-map a:" + stream.transcode_track_id);
-						opts.push(stream.audio_transcode);
-			}
-			else if(stream.codec_type == 'video' && stream.transcode_track_id == options.videotrack){
-						opts.push("-map v:" + stream.transcode_track_id);
-
-						if(options.subtitle_path){
-							//need to use full video encoding with subtitles
-							opts.push( get_video_encode() );
-						} else {
-							opts.push(stream.video_transcode);
-						}
-			}
-		}
-		//todo: error if any selected stream number is not valid
+		var opts = ['-strict experimental'];
 
 		//handle subtitles
-		subtitle_arg = ""
-		subtitle_opt = ""
-		if(options.subtitle_path){
-			//todo: need to check if this version of ffmpeg supports subs before enabling
-			escaped_subs = options.subtitle_path;
-			subtitle_arg = "-vf"
-			subtitle_opt = "subtitles=" + escaped_subs
-		}
+		var subtitle_arg = ""
+		var subtitle_opt = ""
 
-		console.log("calling transcode with options: "+opts)
-		var proc = new ffmpeg({ source: pathToMovie, nolog: true, timeout: 0 })
-		.toFormat('matroska')
-		.addOptions( opts )
-		//.withVideoCodec('copy')
-		//.withAudioCodec('copy')
-		// save to stream
-		/*.onProgress(function(progress) {
-		    console.log(progress);
-		  })*/
-		
-		if(subtitle_arg != ""){
-			proc.addOption( subtitle_arg, subtitle_opt ) //have to add subtitle arg separately to deal with spaces
-		}
+		//check for and extract subs (if needed)
+		extract_subs(data, options, function(options){
 
-		proc.writeToStream(res, function(retcode, ffmpeg_output){
-			//console.log('transcoding finished: '+retcode); //+" error: "+error);
-
-			err = 0;
-			if(retcode == 255){ 
-				//retcode seems like transcoding was terminated early by node, which is fine
-			} else if (retcode == 1){
-				//genuine error
-				err = 1;
+			//build the transcoding parameters for ffmpeg
+			//file based subtitles
+			if(options.subtitle_path){
+				//todo: need to check if this version of ffmpeg supports subs before enabling
+				escaped_subs = options.subtitle_path;
+				subtitle_arg = "-vf"
+				subtitle_opt = "subtitles=" + escaped_subs
 			}
 
-			callback(err, retcode, ffmpeg_output);
-		});
+			//scan the streams to find the selected ones
+			for(var i in data.ffprobe_data.streams){
+				var stream = data.ffprobe_data.streams[i];
 
-	});
+				if(stream.codec_type == 'audio' && stream.transcode_track_id == options.audiotrack){
+							opts.push("-map a:" + stream.transcode_track_id);
+							opts.push(stream.audio_transcode);
+				}
+				else if(stream.codec_type == 'video' && stream.transcode_track_id == options.videotrack){
+							opts.push("-map v:" + stream.transcode_track_id);
+
+							if(options.subtitle_path){
+								//need to use full video encoding with subtitles
+								opts.push( get_video_encode() );
+							} else {
+								opts.push(stream.video_transcode);
+							}
+				}
+			}
+			//todo: error if any selected stream number is not valid
+
+			console.log("calling transcode with options: "+opts)
+			var proc = new ffmpeg({ source: pathToMovie, nolog: true, timeout: 0 })
+			.toFormat('matroska')
+			.addOptions( opts )
+			//.withVideoCodec('copy')
+			//.withAudioCodec('copy')
+			// save to stream
+			/*.onProgress(function(progress) {
+			    console.log(progress);
+			  })*/
+			
+			//add subtitles options
+			if(subtitle_arg != ""){
+				proc.addOption( subtitle_arg, subtitle_opt ) //have to add subtitle arg separately to deal with spaces
+			}
+
+			proc.writeToStream(res, function(retcode, ffmpeg_output){
+				//console.log('transcoding finished: '+retcode); //+" error: "+error);
+
+				err = 0;
+				if(retcode == 255){ 
+					//retcode seems like transcoding was terminated early by node, which is fine
+				} else if (retcode == 1){
+					//genuine error
+					err = 1;
+				}
+
+				cleanup_subs(options);
+				callback(err, retcode, ffmpeg_output);
+			}); 
+		}); //extract_subs
+	}); //get_file_data
 }
 
 module.exports = {
