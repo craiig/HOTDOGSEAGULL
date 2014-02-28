@@ -12,7 +12,7 @@ Verified to work even on a Raspberry Pi when files are fully compatible (i.e. no
  * Uses the default media player app on the Chromecast - no need to get a developer ID or publish an app.
  * Detects which of your local files are fully compatible with the chromecast using ffmpeg
  * Transcoding that only re-encodes the streams that need it. (I.e. audio/video that is already compatible will not be transcoded.).
- * External subtitles (ass,srt) and audio/video track selection when using transcoding.
+ * External and Internal subtitles (ass,srt) and audio/video track selection when using transcoding.
  * Extremely basic UI. Uses templates so adding skins and customizing should be easier.
  * API so you can use transcoding and compatibility checking in your own app! (See below)
  * Lets you try files anyways just in case detection got it wrong. (Let me know when detection is wrong).
@@ -46,7 +46,6 @@ Leave me a note if you have to recompile ffmpeg for your system and I'll make a 
 As of Feb 24 2014:
  * The Chromecast default media player doesn't seem to update the sender on the progress through the video. Manual status changes, such as pausing, muting, etc will cause the progress to get updated. This is also an issue in Google's CastHelloVideo, so I'm not sure if it's just not currently possible or I'm not adding a listener in the right places.
  * Skipping while transcoding is not supported. I'm looking into ways to make this work.
- * FFmpeg cannot handle hardcoding subtitles from internal streams. You'll need to extract your subs to an external file beforehand. Drop me a line if you'd like me to add a subtitle extraction function.
 
 ## Warranty & Support ##
 This server might be very insecure and may leak all your files. Security audits/fixes are more than welcome. For the love of god put this behind a firewall.

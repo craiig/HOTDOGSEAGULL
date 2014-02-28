@@ -242,7 +242,7 @@ var transcode_stream = function(file, res, options, ffmpeg_options, callback){
 	  			'audiotrack' : 0 // number corresponding to the 'transcode_track_id' member from get_file_data()
 	  			'videotrack' : 0 //same as audiotrack
 	  			//coming soon: 
-				'subtitle_path' : "something.srt" //optional, uses <filename>.srt if not provided
+				'subtitle_path' : "something.srt" //optional, specifies file to read subs from
 				'subtitletrack' : 0 //optional, stream number of subtitles track
 	  		}
 	*/
