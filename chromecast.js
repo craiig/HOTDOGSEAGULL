@@ -123,10 +123,6 @@ var get_file_data = function(file, callback){
 			}
 		}
 
-		//generate a recommended transcode command
-		var output_file = '"' + path.basename(file, path.extname(file)) + '.mp4"'
-		obj.transcode_cmd = "ffmpeg -i \"" + path.basename(file) +"\" " + obj.video_transcode + " " + obj.audio_transcode +" "+ output_file
-
 		//ffprobe returns a list of formats that the container might be classified as
 		// i.e. for mp4/mov/etc we'll get a string that looks like: 'mov,mp4,m4a,3gp,3g2,mj2'
 		if(  probeData.format.format_name.split(",").indexOf("mp4") > -1 || probeData.format.format_name.split(",").indexOf("webm") > -1){
