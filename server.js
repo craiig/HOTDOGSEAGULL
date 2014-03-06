@@ -5,8 +5,11 @@ var fs = require('fs');
 var dot = require('dot');
 var express = require('express');
 var path = require('path')
+var util = require('util')
 
 var app = express();
+
+dot.templateSettings.strip = false;
 
 //declare simple templating engine using dot
 app.engine('html', function(path, options, callback){
@@ -22,6 +25,11 @@ app.engine('html', function(path, options, callback){
 })
 
 app.set("views", path.join(__dirname + "/views"))
+
+// define custom logging format
+/*express.logger.format('detailed', function (token, req, res) {                                    
+    return util.inspect(req.headers);
+});  */
 
 app.use(express.logger());
 
