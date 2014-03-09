@@ -1,17 +1,21 @@
 <html>
+<head>
+  <link rel="stylesheet" type="text/css" href="static/hdsg.css" media="all" />
+</head>
 <body>
-
-Reading files from: {{=it.dir}}
+<p>Current Path: {{=it.dir}}</p>
 
 {{ if(it.dir != '/') { }}
-</br>
+<div class="nav">
 <a href="viewfolder?f={{=it.parentdir}}">go up (../)</a>
+</div>
 {{ } }}
 
 <div class="filelist">
 	{{ for(var name in it.files){ }}
 	{{ file = it.files[name]; }}
 	{{ basename = it.require('path').basename(name); }}
+        {{ if (basename == '.DS_Store') continue; }}
 	<div class="file">
 		{{? file.is_dir}}
 			<a href="viewfolder?f={{=name}}">{{=basename}}/</a>
