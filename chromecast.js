@@ -46,12 +46,12 @@ var probe_check_cache = function(file, callback){
 
 var get_video_encode = function(){
 	//returns the default video encoding format for the chromecast
-	return "-vcodec libx264 -profile:v high -level 5.0";
+	return '-vcodec libx264 -profile:v high -level 5.0';
 }
 
 var get_audio_encode = function(){
 	//returns the default audio encoding format for the chromecast
-	return "-acodec aac -q:a 100";
+	return '-acodec aac -q:a 100';
 }
 
 var get_file_data = function(file, callback){
@@ -76,7 +76,7 @@ var get_file_data = function(file, callback){
 
 		//check for subtitles file
 		//add it to the file info
-		subtitle_extensions = [".srt", ".ass"]
+		subtitle_extensions = ['.srt', '.ass']
 		for (i in subtitle_extensions){
 			var ext = subtitle_extensions[i];
 			subtitle_file = path.join(path.dirname(file), path.basename(file, path.extname(file)) + ext)
@@ -86,9 +86,9 @@ var get_file_data = function(file, callback){
 			}
 		}
 
-		/*console.log("--")
+		/*console.log('--')
 		console.log(probeData)
-		console.log("--")*/
+		console.log('--')*/
 
 		//Examine streams and recommend transcoding if needed
 		track_audio = 0;
@@ -102,7 +102,7 @@ var get_file_data = function(file, callback){
 					){
 						obj.video = 1;
 						stream.chromecast_compat = 1;
-						stream.video_transcode = "-vcodec copy";
+						stream.video_transcode = '-vcodec copy';
 				} else {
 					stream.chromecast_compat = 0;
 					stream.video_transcode = get_video_encode(); //get default encoding for chromecast
@@ -114,7 +114,7 @@ var get_file_data = function(file, callback){
 				if( (stream.codec_name == 'aac' || stream.codec_name == 'mp3' || stream.codec_name == 'vorbis' || stream.codec_name == 'opus') ){
 					obj.audio = 1;
 					stream.chromecast_compat = 1;
-					stream.audio_transcode = "-acodec copy";
+					stream.audio_transcode = '-acodec copy';
 				} else {
 					stream.chromecast_compat = 0;
 					stream.audio_transcode = get_audio_encode(); //get default encoding for chromecast
@@ -124,21 +124,21 @@ var get_file_data = function(file, callback){
 		}
 
 		//generate a recommended transcode command
-		var output_file = '"' + path.basename(file, path.extname(file)) + '.mp4"'
-		obj.transcode_cmd = "ffmpeg -i \"" + path.basename(file) +"\" " + obj.video_transcode + " " + obj.audio_transcode +" "+ output_file
+		var output_file = '\'' + path.basename(file, path.extname(file)) + '.mp4\''
+		obj.transcode_cmd = 'ffmpeg -i \'' + path.basename(file) +'\' ' + obj.video_transcode + ' ' + obj.audio_transcode +' '+ output_file
 
 		//ffprobe returns a list of formats that the container might be classified as
 		// i.e. for mp4/mov/etc we'll get a string that looks like: 'mov,mp4,m4a,3gp,3g2,mj2'
-		if(  probeData.format.format_name.split(",").indexOf("mp4") > -1 || probeData.format.format_name.split(",").indexOf("webm") > -1){
+		if(  probeData.format.format_name.split(',').indexOf('mp4') > -1 || probeData.format.format_name.split(',').indexOf('webm') > -1){
 			obj.container = 1;
 		}
 
 		//return full compatibility
-		compat = 0
+		compat = 0;
 		if(obj.audio == 1 && obj.video==1 && obj.container == 1){
 			compat = 1;
 		}
-		callback(compat, obj)
+		callback(compat, obj);
 	});	
 }
 
@@ -146,7 +146,7 @@ var get_dir_data = function(basedir, dir, return_compat, callback){
 	//reads a directory
 	//calls callback( files ) with an associative array of files
 	//if return_compat is true, it also returns results of get_file_info()
-	var response_obj = {}
+	var response_obj = {};
 	var to_check = [];
 
 	real_dir = path.join(basedir, dir)
@@ -172,7 +172,7 @@ var get_dir_data = function(basedir, dir, return_compat, callback){
 	});
 
 	var append_compat = function(file){
-			console.log("checking compatbility: basedir: "+basedir+" file: "+file)
+			console.log('checking compatbility: basedir: '+basedir+' file: '+file)
 			get_file_data(path.join(basedir, file), function(compat, data){
 				response_obj[file].compatibility_data = data;
 				response_obj[file].compatible = compat;
@@ -197,17 +197,17 @@ var extract_subs = function(data, options, callback){
 	if(options.subtitletrack){
 		var substream = data.ffprobe_data.streams[options.subtitletrack];
 		var subexts = { //map between 'codec_name' and subtitle extension
-			"ass" : "ass",
-			"subrip" : "srt",
+			'ass' : 'ass',
+			'subrip' : 'srt',
 		}
-		subext = subexts[substream.codec_name]
+		subext = subexts[substream.codec_name];
 		if(subext){
 			//extract subtitle stream and pass the file to the subtitle path
 			var subfile = 'extracted_subs_' + Date.now() + '.' +subext
 			var subextract = new ffmpeg({ source: pathToMovie, nolog: true, timeout: 0 })
 			.toFormat(subext)
 			.saveToFile(subfile, function(){
-				console.log("sub extraction done");
+				console.log('sub extraction done');
 
 				//call transcoder
 				options.extracted_subs_file = subfile
@@ -225,8 +225,8 @@ var extract_subs = function(data, options, callback){
 var cleanup_subs = function(options){
 	if(options.extracted_subs_file){
 		//clean up the extracted file
-		fs.unlinkSync(options.extracted_subs_file)
-		console.log("deleting subs file "+options.extracted_subs_file)
+		fs.unlinkSync(options.extracted_subs_file);
+		console.log('deleting subs file '+options.extracted_subs_file);
 	}
 }
 
@@ -242,13 +242,13 @@ var transcode_stream = function(file, res, options, ffmpeg_options, callback){
 	  			'audiotrack' : 0 // number corresponding to the 'transcode_track_id' member from get_file_data()
 	  			'videotrack' : 0 //same as audiotrack
 	  			//coming soon: 
-				'subtitle_path' : "something.srt" //optional, specifies file to read subs from
+				'subtitle_path' : 'something.srt' //optional, specifies file to read subs from
 				'subtitletrack' : 0 //optional, stream number of subtitles track
 	  		}
 	*/
 	res.contentType('video/mp4');
 
-	console.log("Invoking transcode with options: " + options)
+	console.log('Invoking transcode with options: ' + options);
 
 	get_file_data(pathToMovie, function(compat, data){
 
@@ -262,8 +262,8 @@ var transcode_stream = function(file, res, options, ffmpeg_options, callback){
 		var opts = ['-strict experimental'];
 
 		//handle subtitles
-		var subtitle_arg = ""
-		var subtitle_opt = ""
+		var subtitle_arg = '';
+		var subtitle_opt = '';
 
 		//check for and extract subs (if needed)
 		extract_subs(data, options, function(options){
@@ -273,8 +273,8 @@ var transcode_stream = function(file, res, options, ffmpeg_options, callback){
 			if(options.subtitle_path){
 				//todo: need to check if this version of ffmpeg supports subs before enabling
 				escaped_subs = options.subtitle_path;
-				subtitle_arg = "-vf"
-				subtitle_opt = "subtitles=" + escaped_subs
+				subtitle_arg = '-vf';
+				subtitle_opt = 'subtitles=' + escaped_subs;
 			}
 
 			//scan the streams to find the selected ones
@@ -282,11 +282,11 @@ var transcode_stream = function(file, res, options, ffmpeg_options, callback){
 				var stream = data.ffprobe_data.streams[i];
 
 				if(stream.codec_type == 'audio' && stream.transcode_track_id == options.audiotrack){
-							opts.push("-map a:" + stream.transcode_track_id);
+							opts.push('-map a:' + stream.transcode_track_id);
 							opts.push(stream.audio_transcode);
 				}
 				else if(stream.codec_type == 'video' && stream.transcode_track_id == options.videotrack){
-							opts.push("-map v:" + stream.transcode_track_id);
+							opts.push('-map v:' + stream.transcode_track_id);
 
 							if(options.subtitle_path){
 								//need to use full video encoding with subtitles
@@ -298,7 +298,7 @@ var transcode_stream = function(file, res, options, ffmpeg_options, callback){
 			}
 			//todo: error if any selected stream number is not valid
 
-			console.log("calling transcode with options: "+opts)
+			console.log('calling transcode with options: '+opts)
 			var proc = new ffmpeg({ source: pathToMovie, nolog: true, timeout: 0 })
 			.toFormat('matroska')
 			.addOptions( opts )
@@ -310,12 +310,12 @@ var transcode_stream = function(file, res, options, ffmpeg_options, callback){
 			  })*/
 			
 			//add subtitles options
-			if(subtitle_arg != ""){
+			if(subtitle_arg != ''){
 				proc.addOption( subtitle_arg, subtitle_opt ) //have to add subtitle arg separately to deal with spaces
 			}
 
 			proc.writeToStream(res, function(retcode, ffmpeg_output){
-				//console.log('transcoding finished: '+retcode); //+" error: "+error);
+				//console.log('transcoding finished: '+retcode); //+' error: '+error);
 
 				err = 0;
 				if(retcode == 255){ 
