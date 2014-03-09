@@ -1,6 +1,8 @@
-var media_folder = "media"
-var chromecast = require('./chromecast.js')
+// change these per-installation
+var media_folder = 'media';
+var listenPort = 3000;
 
+var chromecast = require('./chromecast.js')
 var fs = require('fs');
 var dot = require('dot');
 var express = require('express');
@@ -16,12 +18,12 @@ app.engine('html', function(path, options, callback){
 		var tempFn = dot.template(string);
 		options.app = app; //pass the app into the template
 		options.require = require; //pass in require so we can use it in templates when we need it
-		res = tempFn(options)
-		callback(0, res)
+		res = tempFn(options);
+		callback(0, res);
 	});
 })
 
-app.set("views", path.join(__dirname + "/views"))
+app.set('views', path.join(__dirname + '/views'))
 
 app.use(express.logger());
 
@@ -30,25 +32,32 @@ app.use('/static', express.static(__dirname + '/static'));
 app.use('/static_media', express.static( path.resolve(__dirname, media_folder) ));
 
 app.get('/', function(req, res){
-	chromecast.get_dir_data(media_folder, "/", false, function(files){
-		res.render('index.html', {files: files, dir: media_folder})	
-	})
+	pathResolves = fs.existsSync(path.resolve(__dirname, media_folder));
+	if (! pathResolves){
+ 		 res.render('error.html', {statusCode: '404', message: 'Invalid media directory. Set "media_folder" var in server.js to a valid local path.'});
+	}
+ 	else{
+		chromecast.get_dir_data(media_folder, '/', false, function(files){
+			res.render('index.html', {files: files, dir: media_folder})	
+		});
+	}
 });
 
 app.get('/viewfolder', function(req, res){
-	dir = path.join("/", req.query.f)
+	dir = path.join('/', req.query.f)
 	//res.send(dir)
-	parentdir = path.join(dir, "../")
+	parentdir = path.join(dir, '../')
 	chromecast.get_dir_data(media_folder, dir, false, function(files){
 		res.render('index.html', {files: files, dir: dir, parentdir: parentdir})	
 	})
 });
 
 app.get('/playfile', function(req, res){
-	file_url = path.join("/static_media", req.query.f)
-	transcode_url = path.join("/transcode?f=", req.query.f)
+	file_url = path.join('/static_media', req.query.f)
+	transcode_url = path.join('/transcode?f=', req.query.f)
 
 	chromecast.get_file_data(path.join(media_folder, req.query.f), function(compat, data){
+        	if (data.ffprobe_data == undefined) data.ffprobe_data = {streams: []};
 		res.render('playfile.html', {
 			query: req.query, 
 			file_url: file_url,
@@ -79,16 +88,16 @@ app.get('/transcode', function(req, res) {
 		options.subtitletrack = req.query.subtitletrack
 	}
 
-	chromecast.transcode_stream(pathToMovie, res, options, "", function(err, ffmpeg_error_code, ffmpeg_output){
+	chromecast.transcode_stream(pathToMovie, res, options, '', function(err, ffmpeg_error_code, ffmpeg_output){
 		if(err){
-			console.log("transcode error:");
+			console.log('transcode error:');
 			console.log(ffmpeg_output);
 		} else {
-			console.log("transcoding finished ffmpeg_output: ");
+			console.log('transcoding finished ffmpeg_output: ');
 			console.log(ffmpeg_output);
 		}
 	});
  
 });
 
-app.listen(3000);
+app.listen(listenPort);
