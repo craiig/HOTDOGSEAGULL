@@ -201,7 +201,7 @@ var generate_thumbnail = function(data, options, callback){
                 .on('error', function(err){ console.log('thumbnailer error: ' + err.message); })
                 .on('end', function(filename){
 			options.success_path = filename.join(', ');
-			console.log('generated thumbnail ' + filename.join(', '));
+			console.log('generated thumbnail: ' + options.success_path);
                     })
 		.takeScreenshots({count: 1, timemarks:[timecode], filename: options.thumbnail_name}, options.thumbnail_path);
 	}

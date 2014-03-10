@@ -1,5 +1,5 @@
 // change these per-installation
-var media_folder = '/Volumes/Terratron/Movies';
+var media_folder = 'media';
 var listenPort = 3000;
 
 var chromecast = require('./chromecast.js')
@@ -53,7 +53,13 @@ app.get('/', function(req, res){
 
 app.get('/viewfolder', function(req, res){
 	var ignoredFiles = ['.DS_Store','.localized','.thumbs'];
-	dir = path.join('/', req.query.f)
+	dir = path.join('/', req.query.f);
+	pathResolves = fs.existsSync(media_folder + dir);
+	if (! pathResolves){
+ 		 res.render('error.html', {statusCode: '404', message: 'Invalid directory <b>' + media_folder + dir + '</b>. Ensure "media_folder" var in server.js refers to a valid local path, and check read permissions on this subdirectory.'});
+		return;
+	}
+
 	//res.send(dir)
 	parentdir = path.join(dir, '../')
 	chromecast.get_dir_data(media_folder, dir, false, function(files){
