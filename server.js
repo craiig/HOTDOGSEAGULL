@@ -40,12 +40,17 @@ app.use('/static', express.static(__dirname + '/static'));
 app.use('/static_media', express.static( path.resolve(__dirname, media_folder) ));
 
 app.get('/', function(req, res){
+	var ignoredFiles = ['.DS_Store','.localized','.thumbs'];
 	pathResolves = fs.existsSync(path.resolve(__dirname, media_folder));
 	if (! pathResolves){
  		res.render('error.html', {statusCode: '404', message: 'Invalid media directory. Set "media_folder" var in server.js to a valid local path.'});
 	}
  	else{
 		chromecast.get_dir_data(media_folder, '/', false, function(files){
+			for (var file in files) {
+				file_basename = path.basename(file);
+                        	files[file].url_name = encodeURIComponent(file);
+			}
 			res.render('index.html', {files: files, dir: media_folder})
 		});
 	}
@@ -65,6 +70,7 @@ app.get('/viewfolder', function(req, res){
 	chromecast.get_dir_data(media_folder, dir, false, function(files){
 		for (var file in files) {
 			file_basename = path.basename(file);
+                        files[file].url_name = encodeURIComponent(file);
 			if (!files[file].is_dir && ignoredFiles.indexOf(file_basename) < 0 && ignoredFiles.indexOf(path.basename(dir)) < 0) {
 				options = {
 				 'video_path': media_folder + file,

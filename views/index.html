@@ -17,9 +17,9 @@
 	{{ basename = it.require('path').basename(name); }}
         {{ if (basename == '.DS_Store' || basename == '.thumbs') continue; }}
 	{{? file.is_dir}}
-		<a href="viewfolder?f={{=name}}">
+		<a href="viewfolder?f={{=file.url_name}}">
 	{{??}}
-		<a href="playfile?f={{=name}}">
+		<a href="playfile?f={{=file.url_name}}">
 	{{?}}
 	<div class="file{{? file.is_dir}} directory{{?}}">
 		{{? file.thumbnail_src}}
