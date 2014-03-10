@@ -15,19 +15,22 @@
 	{{ for(var name in it.files){ }}
 	{{ file = it.files[name]; }}
 	{{ basename = it.require('path').basename(name); }}
-        {{ if (basename == '.DS_Store') continue; }}
-	<div class="file">
-		{{? file.is_dir}}
-			<a href="viewfolder?f={{=name}}">{{=basename}}/</a>
-		{{??}}
-			<a href="playfile?f={{=name}}">{{=basename}}</a>
-		{{?}}
+        {{ if (basename == '.DS_Store' || basename == '.thumbs') continue; }}
+	{{? file.is_dir}}
+		<a href="viewfolder?f={{=file.url_name}}">
+	{{??}}
+		<a href="playfile?f={{=file.url_name}}">
+	{{?}}
+	<div class="file{{? file.is_dir}} directory{{?}}">
+		{{? file.thumbnail_src}}
+			<img class="thumb" src="{{=file.thumbnail_src}}" height="{{=file.thumbnail_height}}" width="{{=file.thumbnail_width}}" />
+		{{?}} {{=basename}}
 		
 		<!--<div class="compatibility_data">
 			{{ var util = it.require('util'); }}
 			{{= util.inspect(file) }}
 		</div>-->
-	</div>
+	</div></a>
 	{{ } }}
 </div>
 

@@ -35,28 +35,61 @@ app.set('views', path.join(__dirname + '/views'))
 
 app.use(express.logger());
 
+app.use('/thumb', express.static( path.resolve(__dirname, media_folder) ));
 app.use('/static', express.static(__dirname + '/static'));
-
 app.use('/static_media', express.static( path.resolve(__dirname, media_folder) ));
 
 app.get('/', function(req, res){
+	var ignoredFiles = ['.DS_Store','.localized','.thumbs'];
 	pathResolves = fs.existsSync(path.resolve(__dirname, media_folder));
 	if (! pathResolves){
- 		 res.render('error.html', {statusCode: '404', message: 'Invalid media directory. Set "media_folder" var in server.js to a valid local path.'});
+ 		res.render('error.html', {statusCode: '404', message: 'Invalid media directory. Set "media_folder" var in server.js to a valid local path.'});
 	}
  	else{
 		chromecast.get_dir_data(media_folder, '/', false, function(files){
-			res.render('index.html', {files: files, dir: media_folder})	
+			for (var file in files) {
+				file_basename = path.basename(file);
+                        	files[file].url_name = encodeURIComponent(file);
+			}
+			res.render('index.html', {files: files, dir: media_folder})
 		});
 	}
 });
 
 app.get('/viewfolder', function(req, res){
-	dir = path.join('/', req.query.f)
+	var ignoredFiles = ['.DS_Store','.localized','.thumbs'];
+	dir = path.join('/', req.query.f);
+	pathResolves = fs.existsSync(media_folder + dir);
+	if (! pathResolves){
+ 		res.render('error.html', {statusCode: '403', message: 'Invalid directory <b>' + media_folder + dir + '</b>. Ensure "media_folder" var in server.js refers to a valid local path, and check read permissions on this subdirectory.'});
+		return;
+	}
+
 	//res.send(dir)
 	parentdir = path.join(dir, '../')
 	chromecast.get_dir_data(media_folder, dir, false, function(files){
-		res.render('index.html', {files: files, dir: dir, parentdir: parentdir})	
+		for (var file in files) {
+			file_basename = path.basename(file);
+                        files[file].url_name = encodeURIComponent(file);
+			if (!files[file].is_dir && ignoredFiles.indexOf(file_basename) < 0 && ignoredFiles.indexOf(path.basename(dir)) < 0) {
+				options = {
+				 'video_path': media_folder + file,
+				 'thumbnail_path': media_folder + dir + '/.thumbs/',
+				 'thumbnail_name': path.basename(file) + '.thumb'
+				};
+				if (! fs.existsSync(options.thumbnail_path)){
+					fs.mkdirSync(options.thumbnail_path, 0755, function(err){ console.log('Could not create .thumbs subdirectory: ' + err); });
+				}
+				if (! fs.existsSync(options.thumbnail_path + options.thumbnail_name + '.jpg')){
+					chromecast.generate_thumbnail(files[file], options, function(err, ffmpeg_error_code, ffmpeg_output){ console.log(err); });
+				}
+				if (fs.existsSync(options.thumbnail_path + options.thumbnail_name + '.jpg')){
+					files[file].thumbnail_src = '/thumb/' + dir + '/.thumbs/' + options.thumbnail_name + '.jpg';
+					files[file].thumbnail_width = '160';
+					files[file].thumbnail_height = '90';
+				}
+			}
+		} res.render('index.html', {files: files, dir: dir, parentdir: parentdir})	
 	})
 });
 
@@ -65,7 +98,9 @@ app.get('/playfile', function(req, res){
 	transcode_url = path.join('/transcode?f=', req.query.f)
 
 	chromecast.get_file_data(path.join(media_folder, req.query.f), function(compat, data){
+		// if ffprobe failed, set empty streams array so render loop doesn't fail
         	if (data.ffprobe_data == undefined) data.ffprobe_data = {streams: []};
+
 		res.render('playfile.html', {
 			query: req.query, 
 			file_url: file_url,
