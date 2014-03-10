@@ -3,11 +3,11 @@
   <link rel="stylesheet" type="text/css" href="static/hdsg.css" media="all" />
 </head>
 <body>
-<p>Current Path: {{=it.dir}}</p>
+<p><b>{{=it.dir}}</b></p>
 
 {{ if(it.dir != '/') { }}
 <div class="nav">
-<a href="viewfolder?f={{=it.parentdir}}">go up (../)</a>
+<a href="viewfolder?f={{=it.parentdir}}">Go up (..)</a>
 </div>
 {{ } }}
 

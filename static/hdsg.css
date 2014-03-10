@@ -5,9 +5,17 @@ body {
 }
 
 div.nav {
- font-size: 10pt;
- margin: 2px 0 8px 0;
+ font-size: 11pt;
+ margin: 2px 0 10px 0;
 }
+  div.nav a {
+   text-decoration: none;
+   color: #555;
+  }
+  div.nav a:hover {
+   text-decoration: underline;
+   color: #000;
+  }
 
 img.thumb {
   float: left;
@@ -24,7 +32,9 @@ div.file {
   line-height: 90px;
 }
 div.file.directory {
-  line-height: 45px;
+  background: url(/static/folder-icon.gif) 5px center no-repeat;
+  padding-left: 55px;
+  line-height: 40px;
 }
 div.filelist a {
   text-decoration: none;
