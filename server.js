@@ -84,7 +84,7 @@ app.get('/viewfolder', function(req, res){
 					chromecast.generate_thumbnail(files[file], options, function(err, ffmpeg_error_code, ffmpeg_output){ console.log(err); });
 				}
 				if (fs.existsSync(options.thumbnail_path + options.thumbnail_name + '.jpg')){
-					files[file].thumbnail_src = '/thumb/' + dir + '/.thumbs/' + options.thumbnail_name + '.jpg';
+					files[file].thumbnail_src = '/thumb' + dir + '/.thumbs/' + encodeURIComponent(options.thumbnail_name) + '.jpg';
 					files[file].thumbnail_width = '160';
 					files[file].thumbnail_height = '90';
 				}
@@ -103,9 +103,9 @@ app.get('/playfile', function(req, res){
 
 		res.render('playfile.html', {
 			query: req.query, 
-			file_url: file_url,
-			transcode_url: transcode_url,
-			file_dir: path.dirname(req.query.f),
+			file_url: file_url.replace('#','%23'),
+			transcode_url: transcode_url.replace('#','%23'),
+			file_dir: path.dirname(req.query.f).replace('#','%23'),
 			file_name: path.basename(file_url),
 			compatible: compat,
 			compatibility_data: data
