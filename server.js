@@ -51,7 +51,7 @@ app.get('/', function(req, res){
 				file_basename = path.basename(file);
                         	files[file].url_name = encodeURIComponent(file);
 			}
-			res.render('index.html', {files: files, dir: media_folder})
+			res.render('index.html', {files: files, dir: '/'})
 		});
 	}
 });
