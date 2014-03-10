@@ -42,11 +42,11 @@ app.use('/static_media', express.static( path.resolve(__dirname, media_folder) )
 app.get('/', function(req, res){
 	pathResolves = fs.existsSync(path.resolve(__dirname, media_folder));
 	if (! pathResolves){
- 		 res.render('error.html', {statusCode: '404', message: 'Invalid media directory. Set "media_folder" var in server.js to a valid local path.'});
+ 		res.render('error.html', {statusCode: '404', message: 'Invalid media directory. Set "media_folder" var in server.js to a valid local path.'});
 	}
  	else{
 		chromecast.get_dir_data(media_folder, '/', false, function(files){
-			res.render('index.html', {files: files, dir: media_folder})	
+			res.render('index.html', {files: files, dir: media_folder})
 		});
 	}
 });
@@ -56,7 +56,7 @@ app.get('/viewfolder', function(req, res){
 	dir = path.join('/', req.query.f);
 	pathResolves = fs.existsSync(media_folder + dir);
 	if (! pathResolves){
- 		 res.render('error.html', {statusCode: '404', message: 'Invalid directory <b>' + media_folder + dir + '</b>. Ensure "media_folder" var in server.js refers to a valid local path, and check read permissions on this subdirectory.'});
+ 		res.render('error.html', {statusCode: '403', message: 'Invalid directory <b>' + media_folder + dir + '</b>. Ensure "media_folder" var in server.js refers to a valid local path, and check read permissions on this subdirectory.'});
 		return;
 	}
 
