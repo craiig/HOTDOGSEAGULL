@@ -1,4 +1,4 @@
-
+<!DOCTYPE html>
 <!-- This file was borrowed from Google's examples
 It provides a pretty straightforward set of APIS to start media playing on the chromecast,
 https://github.com/googlecast/CastHelloVideo-chrome
@@ -14,8 +14,6 @@ existing session: show what's playing & allow it to be interrupted
 we'll only see existing sessions for our own paticular app - or someone else's
 todo: properly mirror volume control via session information
 	-->
-
-<!DOCTYPE html>
 <html data-cast-api-enabled="true">
 <head>
 <title>{{=it.file_name}} to Chromecast</title>
@@ -136,12 +134,14 @@ Subtitle Track:
 </select></p> -->
 
 <h2>Debug Controls</h2>
-   <div class="debug_buttons">
-        <button onclick="launchApp()">Launch app</button>
-        <button onclick="stopApp()">Stop app</button>
-        <button onclick="stopMedia()">Unload media</button>
-	</div>
-
+<a href="#debug" onclick="document.getElementById('debug_collection').className='';">Show</a>
+<div id="debug_collection" class="hidden">
+  <a name="debug"></a>
+  <div class="debug_buttons">
+    <button onclick="launchApp()">Launch app</button>
+    <button onclick="stopApp()">Stop app</button>
+    <button onclick="stopMedia()">Unload media</button>
+  </div>
   <div class="debug">
     <textarea rows="20" cols="70" id="debugmessage">
     </textarea>
@@ -168,24 +168,12 @@ Subtitle Track:
   		</pre>
   	</div>
   </div>
+</div>
 
 <script type="text/javascript">
-  function setTranscodeDirectUrl(){
-    document.getElementById("transcodeurl").innerHTML = getTranscodeUrl();
-    document.getElementById("transcodeurl").href = getTranscodeUrl();
-  }
+  var file = document.location.origin + '{{= it.file_url.replace("'", "\\'") }}';
 
-  function getTranscodeUrl(){
-    var transcode = document.location.origin + '{{= it.transcode_url.replace("'", "\\'") }}';
-    transcode += "&audiotrack=" + document.getElementById("audiotrack").value;
-    transcode += "&videotrack=" + document.getElementById("videotrack").value;
-    transcode += "&subtitles=" + document.getElementById("subtitles").value;
-    transcode += "&subtitletrack=" + document.getElementById("subtitletrack").value;
-    return transcode;
-  }
-
-	var file = document.location.origin + '{{= it.file_url.replace("'", "\\'") }}';
-	selectMedia(file);
+  selectMedia(file);
   setTranscodeDirectUrl();
 </script>
 </body>

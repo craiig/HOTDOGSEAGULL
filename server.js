@@ -91,6 +91,9 @@ app.get('/viewfolder', function(req, res) {
 		for (var file in files) {
 			file_basename = path.basename(file);
                         files[file].url_name = encodeURIComponent(file);
+			files[file].static_url = path.join('/static_media', files[file].url_name);
+			files[file].transcode_url = path.join('/transcode?f=', files[file].url_name);
+
 			if (!files[file].is_dir && ignoredTypes.indexOf(file_basename.split('.').pop()) < 0
                          && ignoredFiles.indexOf(file_basename) < 0 && ignoredFiles.indexOf(path.basename(dir)) < 0) {
 				options = {

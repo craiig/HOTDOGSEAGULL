@@ -4,6 +4,14 @@ body {
  font-family: helvetica, sans-serif;
 }
 
+div.hidden {
+  display: none;
+}
+
+h2 {
+  margin: 16px 0 4px 0;
+}
+
 div.nav {
  font-size: 11pt;
  margin: 2px 0 10px 0;
@@ -29,13 +37,29 @@ div.file {
   padding: 7px;
   border: 1px solid #ddd;
   vertical-align: middle;
-  line-height: 90px;
 }
-div.file.directory {
-  background: url(/static/folder-icon.gif) 5px center no-repeat;
-  padding-left: 55px;
-  line-height: 40px;
-}
+  div.file.directory {
+    background: url(/static/folder-icon.gif) 5px center no-repeat;
+    padding-left: 55px;
+    line-height: 40px;
+  }
+  div.file .filename {
+    font-weight: bold;
+    margin: 2px 5px 10px 0px;
+  }
+  div.file .direct a {
+    color: #444;
+    font-size: 11pt;
+    text-decoration: none;
+    border-bottom: 1px dashed #333;
+    margin-bottom: 0px;
+  }
+  div.file .direct a:hover {
+    text-decoration: underline;
+    border-bottom: none;
+    margin-bottom: 1px;
+  }
+
 div.filelist a {
   text-decoration: none;
   color: #222;
