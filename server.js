@@ -98,7 +98,7 @@ app.get('/viewfolder', function(req, res){
 					chromecast.generate_thumb(files[file], options, function(err, ffmpeg_error_code, ffmpeg_output){ console.log(err); });
 				}
 				if (fs.existsSync(options.thumb_path + options.thumb_name + '.jpg')){
-					files[file].thumb_src = '/thumb' + config.thumb_prefix + dir + config.thumb_suffix + encodeURIComponent(options.thumb_name) + '.jpg';
+					files[file].thumb_src = '/thumb' + config.thumb_prefix + escape(dir) + config.thumb_suffix + encodeURIComponent(options.thumb_name) + '.jpg';
 					files[file].thumb_width = '160';
 					files[file].thumb_height = '90';
 				}
