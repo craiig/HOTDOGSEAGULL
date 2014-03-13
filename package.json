@@ -14,6 +14,7 @@
   { "express" : ">=3.4.8",
   	"dot" : ">=1.0.2",
   	"node-ffprobe" :  ">=1.2.2",
-  	"fluent-ffmpeg" : ">=1.5.2"
+  	"fluent-ffmpeg" : ">=1.5.2",
+	"mkdirp" : ">=0.3.5"
   }
 }

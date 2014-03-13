@@ -4,6 +4,7 @@ var dot = require('dot');
 var express = require('express');
 var path = require('path');
 var util = require('util');
+var mkdirp = require('mkdirp');
 
 // read config.json vars, otherwise use frameowrk defaults
 var config = require(__dirname + '/config.json');
@@ -24,8 +25,8 @@ var app = express();
 dot.templateSettings.strip = false;
 
 // declare simple templating engine using dot
-app.engine('html', function(path, options, callback){
-	fs.readFile(path, function(err, string){
+app.engine('html', function(path, options, callback) {
+	fs.readFile(path, function(err, string) {
 		if (err) throw err;
 
 		var tempFn = dot.template(string);
@@ -49,13 +50,13 @@ app.use('/thumb', express.static( path.resolve(__dirname, config.media_folder) )
 app.use('/static', express.static(__dirname + '/static'));
 app.use('/static_media', express.static( path.resolve(__dirname, config.media_folder) ));
 
-app.get('/', function(req, res){
+app.get('/', function(req, res) {
 	pathResolves = fs.existsSync(path.resolve(__dirname, config.media_folder));
-	if (! pathResolves){
+	if (! pathResolves) {
  		res.render('error.html', {statusCode: '404', message: 'Invalid media directory. Set "media_folder" var in server.js to a valid local path.'});
 	}
- 	else{
-		chromecast.get_dir_data(config.media_folder, '/', false, function(files){
+ 	else {
+		chromecast.get_dir_data(config.media_folder, '/', false, function(files) {
 			for (var file in files) {
 				file_basename = path.basename(file);
                         	files[file].url_name = encodeURIComponent(file);
@@ -65,10 +66,10 @@ app.get('/', function(req, res){
 	}
 });
 
-app.get('/viewfolder', function(req, res){
+app.get('/viewfolder', function(req, res) {
 	dir = path.join('/', req.query.f);
 	pathResolves = fs.existsSync(config.media_folder + dir);
-	if (! pathResolves){
+	if (! pathResolves) {
  		res.render('error.html', {statusCode: '403', message: 'Invalid directory <b>' + config.media_folder + dir + '</b>. Ensure "media_folder" var in server.js refers to a valid local path, and check read permissions on this subdirectory.'});
 		return;
 	}
@@ -76,34 +77,30 @@ app.get('/viewfolder', function(req, res){
 	//res.send(dir)
 	parentdir = path.join(dir, '../')
 
-	chromecast.get_dir_data(config.media_folder, dir, false, function(files){
+	var thumb_dir = config.media_folder + config.thumb_prefix + dir + config.thumb_suffix;
+	if (! fs.existsSync(thumb_dir)) {
+		var newdir = mkdirp.sync(thumb_dir, '0755', function(err) { console.log('Could not create thumbs subdirectory: ' + err); });
+	}
+
+	chromecast.get_dir_data(config.media_folder, dir, false, function(files) {
 		for (var file in files) {
 			file_basename = path.basename(file);
                         files[file].url_name = encodeURIComponent(file);
 			if (!files[file].is_dir && ignoredFiles.indexOf(file_basename) < 0 && ignoredFiles.indexOf(path.basename(dir)) < 0) {
 				options = {
 				 'video_path': config.media_folder + file,
-				 'thumb_path': config.media_folder + config.thumb_prefix + dir + config.thumb_suffix,
+				 'thumb_path': thumb_dir,
 				 'thumb_name': path.basename(file) + '.thumb'
 				};
 
-				if (! fs.existsSync(config.media_folder + config.thumb_prefix)){
-					fs.mkdirSync(config.media_folder + config.thumb_prefix, 0755, function(err){ console.log('Could not create media_folder/thumbs_prefix subdirectory: ' + err); });
-				}
-				if (! fs.existsSync(config.media_folder + config.thumb_prefix + dir)){
-					fs.mkdirSync(config.media_folder + config.thumb_prefix + dir, 0755, function(err){ console.log('Could not create thumb_prefix/dir subdirectory: ' + err); });
-				}
-				if (! fs.existsSync(options.thumb_path)){
-					fs.mkdirSync(options.thumb_path, 0755, function(err){ console.log('Could not create .thumbs subdirectory: ' + err); });
-				}
-				if (! fs.existsSync(options.thumb_path + options.thumb_name + '.jpg')){
-					if (imageTypes.indexOf(file_basename.split('.').pop()) < 0) chromecast.generate_thumb(files[file], options, function(err, ffmpeg_error_code, ffmpeg_output){ console.log(err); });
+				if (! fs.existsSync(options.thumb_path + options.thumb_name + '.jpg')) {
+					if (imageTypes.indexOf(file_basename.split('.').pop()) < 0) chromecast.generate_thumb(files[file], options, function(err, ffmpeg_error_code, ffmpeg_output) { console.log(err); });
 					else {
 						files[file].thumb_src = '/thumb' + escape(file);
 						files[file].thumb_width = '120';
 					}
 				}
-				if (fs.existsSync(options.thumb_path + options.thumb_name + '.jpg')){
+				if (fs.existsSync(options.thumb_path + options.thumb_name + '.jpg')) {
 					files[file].thumb_src = '/thumb' + config.thumb_prefix + escape(dir) + config.thumb_suffix + encodeURIComponent(options.thumb_name) + '.jpg';
 					files[file].thumb_width = '160';
 					files[file].thumb_height = '90';
@@ -113,11 +110,11 @@ app.get('/viewfolder', function(req, res){
 	})
 });
 
-app.get('/playfile', function(req, res){
+app.get('/playfile', function(req, res) {
 	file_url = path.join('/static_media', req.query.f)
 	transcode_url = path.join('/transcode?f=', req.query.f)
 
-	chromecast.get_file_data(path.join(config.media_folder, req.query.f), function(compat, data){
+	chromecast.get_file_data(path.join(config.media_folder, req.query.f), function(compat, data) {
 		// if ffprobe failed, set empty streams array so render loop doesn't fail
         	if (data.ffprobe_data == undefined) data.ffprobe_data = {streams: []};
 
@@ -137,22 +134,22 @@ app.get('/transcode', function(req, res) {
 	// borrowed from the  ffmpeg-fluent examples
 	pathToMovie = path.join(config.media_folder, req.query.f)
 
-	options = { }
-	if(req.query.audiotrack){
+	options = {};
+	if(req.query.audiotrack) {
 		options.audiotrack = req.query.audiotrack
 	}
-	if(req.query.videotrack){
+	if(req.query.videotrack) {
 		options.videotrack = req.query.videotrack
 	}
-	if(req.query.subtitles){
+	if(req.query.subtitles) {
 		options.subtitle_path = path.join(path.dirname(pathToMovie), req.query.subtitles)
 	}
-	if(req.query.subtitletrack){
+	if(req.query.subtitletrack) {
 		options.subtitletrack = req.query.subtitletrack
 	}
 
-	chromecast.transcode_stream(pathToMovie, res, options, '', function(err, ffmpeg_error_code, ffmpeg_output){
-		if(err){
+	chromecast.transcode_stream(pathToMovie, res, options, '', function(err, ffmpeg_error_code, ffmpeg_output) {
+		if(err) {
 			console.log('transcode error:');
 			console.log(ffmpeg_output);
 		} else {
