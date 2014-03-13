@@ -20,6 +20,7 @@ config.max_thumb_wait = config.max_thumb_wait || 4000; // wait for this many ms 
 // set global option arrays (these should be communal for the most part, not config-specific
 var imageTypes = ['jpg','jpeg','png','webp','bmp','gif'];
 var ignoredFiles = ['.DS_Store','.localized','.thumbs'];
+var ignoredTypes = ['nfo','txt','md5','exe','bat','sh','js','xml','json','php','dat','tmp'];
 
 // setup core frameworks
 var app = express();
@@ -90,7 +91,8 @@ app.get('/viewfolder', function(req, res) {
 		for (var file in files) {
 			file_basename = path.basename(file);
                         files[file].url_name = encodeURIComponent(file);
-			if (!files[file].is_dir && ignoredFiles.indexOf(file_basename) < 0 && ignoredFiles.indexOf(path.basename(dir)) < 0) {
+			if (!files[file].is_dir && ignoredTypes.indexOf(file_basename.split('.').pop()) < 0
+                         && ignoredFiles.indexOf(file_basename) < 0 && ignoredFiles.indexOf(path.basename(dir)) < 0) {
 				options = {
 				 'video_path': config.media_folder + file,
 				 'thumb_path': thumb_dir,
