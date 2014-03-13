@@ -201,7 +201,7 @@ var generate_thumb = function(data, options, callback){
                 .on('error', function(err){ console.log('thumbnailer error: ' + err.message); })
                 .on('end', function(filename){
 			options.success_path = filename.join(', ');
-			console.log('generated thumb: ' + options.success_path);
+			//console.log('generated thumb: ' + options.success_path);
                     })
 		.takeScreenshots({count: 1, timemarks:[timecode], filename: options.thumb_name}, options.thumb_path);
 	}

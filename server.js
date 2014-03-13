@@ -15,6 +15,7 @@ config.listen_port  = config.listen_port || 30; // set to 80 for "normal" server
 config.media_folder = config.media_folder || 'media';     // symlink local "media" dir to your media root
 config.thumb_prefix = config.thumb_prefix || '';          // set to '/.thumbs' style uri for top level cache
 config.thumb_suffix = config.thumb_suffix || '/.thumbs/'; // set to '/' if using top level cache (can NOT be empty string)
+config.max_thumb_wait = config.max_thumb_wait || 4000; // wait for this many ms before just listing dir without all thumbs
 
 // set global option arrays (these should be communal for the most part, not config-specific
 var imageTypes = ['jpg','jpeg','png','webp','bmp','gif'];
@@ -83,6 +84,9 @@ app.get('/viewfolder', function(req, res) {
 	}
 
 	chromecast.get_dir_data(config.media_folder, dir, false, function(files) {
+		var generated_thumbs = 0;
+		var speedo = 250; // wait in ms per generated thumb; default allows a fast system to display most initially, but won't slow down initial directory listing significantly when tons of new files found
+
 		for (var file in files) {
 			file_basename = path.basename(file);
                         files[file].url_name = encodeURIComponent(file);
@@ -94,19 +98,31 @@ app.get('/viewfolder', function(req, res) {
 				};
 
 				if (! fs.existsSync(options.thumb_path + options.thumb_name + '.jpg')) {
-					if (imageTypes.indexOf(file_basename.split('.').pop()) < 0) chromecast.generate_thumb(files[file], options, function(err, ffmpeg_error_code, ffmpeg_output) { console.log(err); });
+					if (imageTypes.indexOf(file_basename.split('.').pop()) < 0) {
+						chromecast.generate_thumb(files[file], options, function(err, ffmpeg_error_code, ffmpeg_output) { console.log(err); });
+						files[file].thumb_src = '/thumb' + config.thumb_prefix + escape(dir) + config.thumb_suffix + encodeURIComponent(options.thumb_name) + '.jpg';
+						files[file].thumb_width = '160';
+						files[file].thumb_height = '90';
+						++generated_thumbs;
+					}
 					else {
 						files[file].thumb_src = '/thumb' + escape(file);
 						files[file].thumb_width = '120';
 					}
 				}
-				if (fs.existsSync(options.thumb_path + options.thumb_name + '.jpg')) {
+				else { // found a cached thumbnail, sweet
 					files[file].thumb_src = '/thumb' + config.thumb_prefix + escape(dir) + config.thumb_suffix + encodeURIComponent(options.thumb_name) + '.jpg';
 					files[file].thumb_width = '160';
 					files[file].thumb_height = '90';
 				}
 			}
-		} res.render('index.html', {files: files, dir: dir, parentdir: parentdir})	
+		}
+
+		if (generated_thumbs) {
+			console.log('Waiting ' + (generated_thumbs * speedo) +  ' ms for thumbnail generation...');
+			setTimeout(function() { res.render('index.html', {files: files, dir: dir, parentdir: parentdir}) }, Math.min((generated_thumbs * speedo), config.max_thumb_wait));
+		}
+		else res.render('index.html', {files: files, dir: dir, parentdir: parentdir});
 	})
 });
 
