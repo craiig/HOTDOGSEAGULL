@@ -192,18 +192,18 @@ var get_dir_data = function(basedir, dir, return_compat, callback){
 	}
 }
 
-var generate_thumbnail = function(data, options, callback){
+var generate_thumb = function(data, options, callback){
 	var timecode = '5%' // take screenshot 5% into vid (could be specified in seconds instead, e.g. '1' means 1 second in)
 
-	if (options.video_path && options.thumbnail_path){
+	if (options.video_path && options.thumb_path){
 		var thumbnailer = new ffmpeg({source: options.video_path})
                 .withSize('320x180')
                 .on('error', function(err){ console.log('thumbnailer error: ' + err.message); })
                 .on('end', function(filename){
 			options.success_path = filename.join(', ');
-			console.log('generated thumbnail: ' + options.success_path);
+			console.log('generated thumb: ' + options.success_path);
                     })
-		.takeScreenshots({count: 1, timemarks:[timecode], filename: options.thumbnail_name}, options.thumbnail_path);
+		.takeScreenshots({count: 1, timemarks:[timecode], filename: options.thumb_name}, options.thumb_path);
 	}
 
   callback(options);
@@ -353,5 +353,5 @@ module.exports = {
   get_file_data: get_file_data,
   get_dir_data: get_dir_data,
   transcode_stream: transcode_stream,
-  generate_thumbnail: generate_thumbnail
+  generate_thumb: generate_thumb
 }
