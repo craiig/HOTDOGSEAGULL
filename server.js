@@ -132,12 +132,25 @@ app.get('/viewfolder', function(req, res) {
 });
 
 app.get('/playfile', function(req, res) {
-	file_url = path.join('/static_media', req.query.f)
-	transcode_url = path.join('/transcode?f=', req.query.f)
+	file_url = path.join('/static_media', req.query.f);
+	transcode_url = path.join('/transcode?f=', req.query.f);
+        dirs = req.query.f.split('/').filter(function(e){return e});
+        dirs.pop();
+
+	thumb_dir = config.media_folder + config.thumb_prefix + '/' + dirs + config.thumb_suffix;
+	thumb_name = path.basename(req.query.f) + '.thumb';
 
 	chromecast.get_file_data(path.join(config.media_folder, req.query.f), function(compat, data) {
 		// if ffprobe failed, set empty streams array so render loop doesn't fail
         	if (data.ffprobe_data == undefined) data.ffprobe_data = {streams: []};
+
+		if (fs.existsSync(thumb_dir + thumb_name + '.jpg')) {
+			thumb_src = '/thumb' + config.thumb_prefix + '/' + escape(dirs) + config.thumb_suffix + encodeURIComponent(thumb_name) + '.jpg';
+		}
+		else {
+			console.log('No thumb for ' + thumb_dir + thumb_name + '.jpg');
+			thumb_src = false;
+		}
 
 		res.render('playfile.html', {
 			query: req.query, 
@@ -146,7 +159,8 @@ app.get('/playfile', function(req, res) {
 			file_dir: path.dirname(req.query.f).replace('#','%23'),
 			file_name: path.basename(file_url),
 			compatible: compat,
-			compatibility_data: data
+			compatibility_data: data,
+			thumb_src: thumb_src
 		});
 	});
 });

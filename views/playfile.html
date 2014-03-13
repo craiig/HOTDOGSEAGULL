@@ -23,7 +23,11 @@ todo: properly mirror volume control via session information
 </head>
 <body>
   <h1>{{=it.file_name}}</h1>
-  <p><a href="/viewfolder?f={{=it.file_dir}}">Back to directory</a></p>
+<div class="nav"><p><a href="/viewfolder?f={{=it.file_dir}}">Back up (..)</a></p></nav>
+
+{{? it.thumb_src}}
+  <img class="thumb" src="{{=it.thumb_src}}" height="{{=it.thumb_height}}" width="{{=it.thumb_width}}" />
+{{?}}
 
 <h2>Player Controls</h2>
 <p>Direct URL to media: <a href="{{=it.file_url}}">{{=it.file_url}}</a></p>
