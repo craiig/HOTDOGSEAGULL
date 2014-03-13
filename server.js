@@ -15,6 +15,10 @@ config.media_folder = config.media_folder || 'media';     // symlink local "medi
 config.thumb_prefix = config.thumb_prefix || '';          // set to '/.thumbs' style uri for top level cache
 config.thumb_suffix = config.thumb_suffix || '/.thumbs/'; // set to '/' if using top level cache (can NOT be empty string)
 
+// set global option arrays (these should be communal for the most part, not config-specific
+var imageTypes = ['jpg','jpeg','png','webp','bmp','gif'];
+var ignoredFiles = ['.DS_Store','.localized','.thumbs'];
+
 // setup core frameworks
 var app = express();
 dot.templateSettings.strip = false;
@@ -46,7 +50,6 @@ app.use('/static', express.static(__dirname + '/static'));
 app.use('/static_media', express.static( path.resolve(__dirname, config.media_folder) ));
 
 app.get('/', function(req, res){
-	var ignoredFiles = ['.DS_Store','.localized','.thumbs'];
 	pathResolves = fs.existsSync(path.resolve(__dirname, config.media_folder));
 	if (! pathResolves){
  		res.render('error.html', {statusCode: '404', message: 'Invalid media directory. Set "media_folder" var in server.js to a valid local path.'});
@@ -63,7 +66,6 @@ app.get('/', function(req, res){
 });
 
 app.get('/viewfolder', function(req, res){
-	var ignoredFiles = ['.DS_Store','.localized','.thumbs'];
 	dir = path.join('/', req.query.f);
 	pathResolves = fs.existsSync(config.media_folder + dir);
 	if (! pathResolves){
@@ -95,7 +97,11 @@ app.get('/viewfolder', function(req, res){
 					fs.mkdirSync(options.thumb_path, 0755, function(err){ console.log('Could not create .thumbs subdirectory: ' + err); });
 				}
 				if (! fs.existsSync(options.thumb_path + options.thumb_name + '.jpg')){
-					chromecast.generate_thumb(files[file], options, function(err, ffmpeg_error_code, ffmpeg_output){ console.log(err); });
+					if (imageTypes.indexOf(file_basename.split('.').pop()) < 0) chromecast.generate_thumb(files[file], options, function(err, ffmpeg_error_code, ffmpeg_output){ console.log(err); });
+					else {
+						files[file].thumb_src = '/thumb' + escape(file);
+						files[file].thumb_width = '120';
+					}
 				}
 				if (fs.existsSync(options.thumb_path + options.thumb_name + '.jpg')){
 					files[file].thumb_src = '/thumb' + config.thumb_prefix + escape(dir) + config.thumb_suffix + encodeURIComponent(options.thumb_name) + '.jpg';
