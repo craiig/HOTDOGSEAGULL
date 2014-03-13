@@ -99,7 +99,7 @@ app.get('/viewfolder', function(req, res) {
 
 				if (! fs.existsSync(options.thumb_path + options.thumb_name + '.jpg')) {
 					if (imageTypes.indexOf(file_basename.split('.').pop()) < 0) {
-						chromecast.generate_thumb(files[file], options, function(err, ffmpeg_error_code, ffmpeg_output) { console.log(err); });
+						chromecast.generate_thumb(files[file], options, function(err, ffmpeg_error_code, ffmpeg_output) { if (err.error) console.log(error); });
 						files[file].thumb_src = '/thumb' + config.thumb_prefix + escape(dir) + config.thumb_suffix + encodeURIComponent(options.thumb_name) + '.jpg';
 						files[file].thumb_width = '160';
 						files[file].thumb_height = '90';
@@ -120,7 +120,7 @@ app.get('/viewfolder', function(req, res) {
 
 		if (generated_thumbs) {
 			console.log('Waiting ' + (generated_thumbs * speedo) +  ' ms for thumbnail generation...');
-			setTimeout(function() { res.render('index.html', {files: files, dir: dir, parentdir: parentdir}) }, Math.min((generated_thumbs * speedo), config.max_thumb_wait));
+			setTimeout(function() { res.render('index.html', {files: files, dir: dir, parentdir: parentdir}) }, Math.min((generated_thumbs * speedo) + 500, config.max_thumb_wait));
 		}
 		else res.render('index.html', {files: files, dir: dir, parentdir: parentdir});
 	})

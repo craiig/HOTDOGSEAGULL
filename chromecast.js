@@ -192,14 +192,14 @@ var get_dir_data = function(basedir, dir, return_compat, callback){
 	}
 }
 
-var generate_thumb = function(data, options, callback){
+var generate_thumb = function(data, options, callback) {
 	var timecode = '5%' // take screenshot 5% into vid (could be specified in seconds instead, e.g. '1' means 1 second in)
 
-	if (options.video_path && options.thumb_path){
+	if (options.video_path && options.thumb_path) {
 		var thumbnailer = new ffmpeg({source: options.video_path})
                 .withSize('320x180')
-                .on('error', function(err){ console.log('thumbnailer error: ' + err.message); })
-                .on('end', function(filename){
+                .on('error', function(err) { options.error = 'Thumbnail creation error: ' + err.message; })
+                .on('end', function(filename) {
 			options.success_path = filename.join(', ');
 			//console.log('generated thumb: ' + options.success_path);
                     })
