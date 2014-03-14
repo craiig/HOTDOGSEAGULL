@@ -103,6 +103,10 @@ var get_file_data = function(file, callback){
 						obj.video = 1;
 						stream.chromecast_compat = 1;
 						stream.video_transcode = '-vcodec copy';
+				} else if(stream.codec_name == 'vp8'){
+					obj.video = 1;
+					stream.chromecast_compat = 1;
+					stream.video_transcode = '-vcodec copy';
 				} else {
 					stream.chromecast_compat = 0;
 					stream.video_transcode = get_video_encode(); //get default encoding for chromecast
