@@ -97,8 +97,8 @@ var get_file_data = function(file, callback){
 			stream = probeData.streams[i]
 			if(stream.codec_type == 'video'){
 				if(stream.codec_name == 'h264' 
-					&& stream.profile == 'High'
-					&& (stream.level == 31 || stream.level == 41 || stream.level == 42 || stream.level == 5 || stream.level == 50 || stream.level == 51)
+					&& (stream.profile == 'High' || stream.profile == 'Main')
+					&& (stream.level == 31 || stream.level == 40 || stream.level == 41 || stream.level == 42 || stream.level == 5 || stream.level == 50 || stream.level == 51)
 					){
 						obj.video = 1;
 						stream.chromecast_compat = 1;
