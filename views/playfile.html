@@ -20,7 +20,17 @@ todo: properly mirror volume control via session information
 <head>
 <title>{{=it.file_name}} to Chromecast</title>
 <script type="text/javascript" src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js"></script>
-<script src="/static/chromecast.js"></script>
+<script type="text/javascript" src="/static/chromecast.js"></script>
+<script>
+function calculateProgress(value){
+  //value is 0/100
+  if(currentMediaSession){
+    return convertSeconds2hms((value/100)*currentMediaSession.media.duration);
+  } else {
+    return value;
+  }
+}
+</script>
 <link rel="stylesheet" type="text/css" href="static/hdsg.css" media="all" />
 </head>
 <body>
@@ -44,7 +54,9 @@ todo: properly mirror volume control via session information
 	</div>
 </div>
 <div class="progress">
-    Progress : 0% <input id="progress" type="range" min="1" max="100" value="1" step="1" onmouseup="seekMedia(this.value);"> 100%
+    Progress : <input style="width: 60%" id="progress" type="range" min="1" max="100" value="1" step="0.1" onmouseup="seekMedia(this.value);" oninput="document.getElementById('currentmedia_progress').innerHTML = calculateProgress(this.value);">
+    <span id="currentmedia_progress">0</span> / <span id="currentmedia_duration">100%</span>
+    <br/>
   </div>
 
 <div class="debug_buttons">
