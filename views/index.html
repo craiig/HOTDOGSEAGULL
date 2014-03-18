@@ -2,16 +2,13 @@
 <html data-cast-api-enabled="true">
 <head>
   <link rel="stylesheet" type="text/css" href="static/hdsg.css" media="all" />
-  <script type="text/javascript" src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js"></script>
-  <script src="/static/chromecast.js"></script>
-  <script src="/static/hdsg.js"></script>
 </head>
 <body>
 <p><b>{{=it.dir}}</b></p>
 
 {{ if(it.dir != '/') { }}
 <div class="nav">
-<a href="viewfolder?f={{=it.parentdir}}">Back up (..)</a>
+<a href="/?f={{=it.parentdir}}">Back up (..)</a>
 </div>
 {{ } }}
 
@@ -21,15 +18,17 @@
 	{{ basename = it.require('path').basename(name); }}
         {{ if (basename == '.DS_Store' || basename == '.thumbs' || basename == '.localized') continue; }}
 	{{? file.is_dir}}
-		<a href="viewfolder?f={{=file.url_name}}">
+		<a href="/?f={{=file.url_name}}">
 	{{??}}
 		<a href="playfile?f={{=file.url_name}}">
 	{{?}}
 	<div class="file{{? file.is_dir}} directory{{?}}">
-		{{? file.thumb_src}}
+		{{? file.thumb_generating }}
+			<img class="thumb generating" src="{{=file.thumb_src}}" height="{{=file.thumb_height}}" width="{{=file.thumb_width}}" data-targetsrc="{{=file.thumb_dir + '/' + file.thumb_generating}}"/>
+		{{?? file.thumb_src }}
 			<img class="thumb" src="{{=file.thumb_src}}" height="{{=file.thumb_height}}" width="{{=file.thumb_width}}" />
 		{{?}}<div class="filename">{{=basename}}</div>
-		{{? !file.is_dir}} <div class="direct"><p><a href="{{=file.static_url}}">Preview native</a> | <a href="javascript:void(0);" onclick="selectMedia(getTranscodeUrl(file)); loadAndPlayMedia();">Cast native</a></p><p><a href="{{=file.transcode_url}}">Preview transcoded</a> | <a href="{{=file.transcode_cast}}">Cast transcoded</a></p></div>{{?}}
+		{{? !file.is_dir}} <div class="direct"><p><a href="{{=file.static_url}}">Preview native</a><!-- | <a href="javascript:void(0);" onclick="selectMedia(getTranscodeUrl(file)); loadAndPlayMedia();">Cast native</a>--></p><p><a href="{{=file.transcode_url}}">Preview transcoded</a><!-- | <a href="{{=file.transcode_cast}}">Cast transcoded</a>--></p></div>{{?}}
 		
 		<!--<div class="compatibility_data">
 			{{ var util = it.require('util'); }}
@@ -39,5 +38,9 @@
 	{{ } }}
 </div>
 
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js"></script>
+  <script src="//www.gstatic.com/cv/js/sender/v1/cast_sender.js"></script>
+  <script src="/static/chromecast.js"></script>
+  <script src="/static/hdsg.js"></script>
 </body>
 </html>

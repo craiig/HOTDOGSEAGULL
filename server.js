@@ -11,16 +11,18 @@ var config = require(__dirname + '/config.json');
 
 // change per-installation in git-ignored config.json; or, override here like a n00b
 config.name = config.name || 'HOTDOGSEAGULL';   // ridiculous; awesome;
-config.listen_port  = config.listen_port || 30; // set to 80 for "normal" server
+config.listen_port  = config.listen_port || 3000; // set to 80 for "normal" server
 config.media_folder = config.media_folder || 'media';     // symlink local "media" dir to your media root
 config.thumb_prefix = config.thumb_prefix || '';          // set to '/.thumbs' style uri for top level cache
 config.thumb_suffix = config.thumb_suffix || '/.thumbs/'; // set to '/' if using top level cache (can NOT be empty string)
-config.max_thumb_wait = config.max_thumb_wait || 4000; // wait for this many ms before just listing dir without all thumbs
 
-// set global option arrays (these should be communal for the most part, not config-specific
-var imageTypes = ['jpg','jpeg','png','webp','bmp','gif'];
-var ignoredFiles = ['.DS_Store','.localized','.thumbs'];
-var ignoredTypes = ['nfo','txt','md5','exe','bat','sh','js','xml','json','php','dat','tmp'];
+// global option arrays (should be communal for the most part; not config-specific)
+var imageTypes = ['jpg','jpeg','png','webp','bmp','gif']; // displayed nativey rather than thru ffmpeg
+var ignoredFiles = ['.DS_Store','.lock','.md5','.localized','.thumbs']; // not even displayed
+
+// types not to try and generate thumbnails for (use default unknown-file image)
+var ignoredTypes = ['nfo','txt','md5','exe','bat','sh','js','xml','json','php',
+		    'dat','tmp','plist','pdf','doc','docx','zip','.rar'];
 
 // setup core frameworks
 var app = express();
@@ -52,32 +54,15 @@ app.use('/thumb', express.static( path.resolve(__dirname, config.media_folder) )
 app.use('/static', express.static(__dirname + '/static'));
 app.use('/static_media', express.static( path.resolve(__dirname, config.media_folder) ));
 
-app.get('/', function(req, res) {
-	pathResolves = fs.existsSync(path.resolve(__dirname, config.media_folder));
-	if (! pathResolves) {
- 		res.render('error.html', {statusCode: '404', message: 'Invalid media directory. Set "media_folder" var in server.js to a valid local path.'});
-	}
- 	else {
-		chromecast.get_dir_data(config.media_folder, '/', false, function(files) {
-			for (var file in files) {
-				file_basename = path.basename(file);
-                        	files[file].url_name = encodeURIComponent(file);
-			}
-			res.render('index.html', {files: files, dir: '/'})
-		});
-	}
-});
-
-app.get('/viewfolder', function(req, res) {
-	dir = path.join('/', req.query.f);
+directoryList = function(req, res) {
+	dir = (req.query.f) ? path.join('/', req.query.f) : '/';
 	pathResolves = fs.existsSync(config.media_folder + dir);
 	if (! pathResolves) {
  		res.render('error.html', {statusCode: '403', message: 'Invalid directory <b>' + config.media_folder + dir + '</b>. Ensure "media_folder" var in server.js refers to a valid local path, and check read permissions on this subdirectory.'});
 		return;
 	}
 
-	//res.send(dir)
-	parentdir = path.join(dir, '../')
+	parentdir = (dir == '/') ? false : path.join(dir, '../');
 
 	var thumb_dir = config.media_folder + config.thumb_prefix + dir + config.thumb_suffix;
 	if (! fs.existsSync(thumb_dir)) {
@@ -86,7 +71,7 @@ app.get('/viewfolder', function(req, res) {
 
 	chromecast.get_dir_data(config.media_folder, dir, false, function(files) {
 		var generated_thumbs = 0;
-		var speedo = 250; // wait in ms per generated thumb; default allows a fast system to display most initially, but won't slow down initial directory listing significantly when tons of new files found
+		var default_thumb = '/static/thumb_generating.gif';
 
 		for (var file in files) {
 			file_basename = path.basename(file);
@@ -105,7 +90,9 @@ app.get('/viewfolder', function(req, res) {
 				if (! fs.existsSync(options.thumb_path + options.thumb_name + '.jpg')) {
 					if (imageTypes.indexOf(file_basename.split('.').pop()) < 0) {
 						chromecast.generate_thumb(files[file], options, function(err, ffmpeg_error_code, ffmpeg_output) { if (err.error) console.log(error); });
-						files[file].thumb_src = '/thumb' + config.thumb_prefix + escape(dir) + config.thumb_suffix + encodeURIComponent(options.thumb_name) + '.jpg';
+						files[file].thumb_generating = encodeURIComponent(options.thumb_name) + '.jpg';
+						files[file].thumb_dir = config.thumb_prefix + escape(dir) + config.thumb_suffix;
+						files[file].thumb_src = default_thumb;
 						files[file].thumb_width = '160';
 						files[file].thumb_height = '90';
 						++generated_thumbs;
@@ -122,13 +109,31 @@ app.get('/viewfolder', function(req, res) {
 				}
 			}
 		}
+		if (generated_thumbs) console.log('Generating ' + generated_thumbs + ' new thumbnails to ' + config.thumb_prefix + dir + config.thumb_suffix);
 
-		if (generated_thumbs) {
-			console.log('Waiting ' + (generated_thumbs * speedo) +  ' ms for thumbnail generation...');
-			setTimeout(function() { res.render('index.html', {files: files, dir: dir, parentdir: parentdir}) }, Math.min((generated_thumbs * speedo) + 500, config.max_thumb_wait));
+		res.render('index.html', {files: files, dir: dir, parentdir: parentdir});
+	});
+}
+
+app.get('/', directoryList);
+
+app.get('/thumbgen', function(req, res) {
+        dir_parts = req.query.f.split('/').filter(function(e){return e});
+        dir_parts.pop()
+        dirs = dir_parts.join('/') + '/';
+
+	thumb_dir = path.join(config.media_folder, dirs);
+	thumb_name = path.basename(req.query.f);
+
+	if (req.query.f) {
+		if (fs.existsSync(thumb_dir + thumb_name)) {
+			res.json({thumb_src: '/thumb/' + escape(dirs) + encodeURIComponent(thumb_name)});
 		}
-		else res.render('index.html', {files: files, dir: dir, parentdir: parentdir});
-	})
+		else {
+			res.json({message: 'generating'});
+		}
+	}
+  	else res.json({message: '400 bad request: no f param (required).'});
 });
 
 app.get('/playfile', function(req, res) {
