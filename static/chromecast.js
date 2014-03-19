@@ -245,6 +245,20 @@ function onMediaError(e) {
   //document.getElementById("casticon").src = 'images/cast_icon_warning.png'; 
 }
 
+function convertSeconds2hms(seconds){
+  var d = new Date(0, 0, 0, 0, 0, seconds, 0);
+  var date_string = "";
+  if(d.getHours() > 0){
+    date_string += d.getHours() + "h"
+  }
+  if(d.getMinutes() > 0){
+    date_string += d.getMinutes() + "m"
+  }
+  date_string += d.getSeconds() + "s"
+
+  return date_string
+}
+
 /**
  * callback for media status event
  * @param {Object} e A non-null media object
@@ -281,6 +295,11 @@ function onMediaStatusUpdate(isAlive) {
       break;
   } 
   document.getElementById("currentmedianame").innerHTML = currentMediaSession.media.contentId;
+
+  //make date
+  document.getElementById("currentmedia_duration").innerHTML = convertSeconds2hms(currentMediaSession.media.duration);
+
+  document.getElementById("currentmedia_progress").innerHTML = convertSeconds2hms(currentMediaSession.currentTime);
 
   document.getElementById("playerstate").innerHTML = currentMediaSession.playerState;
 }
