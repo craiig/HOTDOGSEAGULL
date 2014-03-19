@@ -18,7 +18,7 @@ var fs = require('fs');
 
 //cache the responses from reading ff-probe
 //based on the mtime of the file 
-var probe_cache = {}
+var probe_cache = {};
 
 //function to cache the results of probe
 var probe_check_cache = function(file, callback){
@@ -26,33 +26,33 @@ var probe_check_cache = function(file, callback){
 
 	var append_probe_cache = function(err, probeData){
 				if(probeData){
-					probe_cache[file] = {}
+					probe_cache[file] = {};
 					probe_cache[file].stats = stats;
 					probe_cache[file].probeData = probeData;
 				}
-				callback(err, probeData)
-			}
+				callback(err, probeData);
+		};
 
 	if(file in probe_cache){
 		if(probe_cache[file].stats.mtime.valueOf() != stats.mtime.valueOf()){
 			probe(file, append_probe_cache);
 		} else {
-			callback(0, probe_cache[file].probeData)
+			callback(0, probe_cache[file].probeData);
 		}
 	} else {
 		probe(file, append_probe_cache);
 	}
-}
+};
 
 var get_video_encode = function(){
 	//returns the default video encoding format for the chromecast
 	return '-vcodec libx264 -profile:v high -level 5.0';
-}
+};
 
 var get_audio_encode = function(){
 	//returns the default audio encoding format for the chromecast
 	return '-acodec aac -q:a 100';
-}
+};
 
 var get_file_data = function(file, callback){
 	//callback is: function(compatibility, data)
@@ -65,7 +65,7 @@ var get_file_data = function(file, callback){
 			video: 0,
 			container: 0,
 			ffprobe_data: undefined
-		}
+		};
 
 		//error check and abort
 		if(probeData == undefined){
@@ -76,10 +76,10 @@ var get_file_data = function(file, callback){
 
 		//check for subtitles file
 		//add it to the file info
-		subtitle_extensions = ['.srt', '.ass']
+		subtitle_extensions = ['.srt', '.ass'];
 		for (i in subtitle_extensions){
 			var ext = subtitle_extensions[i];
-			subtitle_file = path.join(path.dirname(file), path.basename(file, path.extname(file)) + ext)
+			subtitle_file = path.join(path.dirname(file), path.basename(file, path.extname(file)) + ext);
 			if(fs.existsSync(subtitle_file)){
 				obj.subtitle_file = path.basename(subtitle_file);
 				break;
@@ -94,7 +94,7 @@ var get_file_data = function(file, callback){
 		track_audio = 0;
 		track_video = 0;
 		for(i in probeData.streams){
-			stream = probeData.streams[i]
+			stream = probeData.streams[i];
 			if(stream.codec_type == 'video'){
 				if(stream.codec_name == 'h264' 
 					&& (stream.profile == 'High' || stream.profile == 'Main')
@@ -128,8 +128,8 @@ var get_file_data = function(file, callback){
 		}
 
 		//generate a recommended transcode command
-		var output_file = '\'' + path.basename(file, path.extname(file)) + '.mp4\''
-		obj.transcode_cmd = 'ffmpeg -i \'' + path.basename(file) +'\' ' + obj.video_transcode + ' ' + obj.audio_transcode +' '+ output_file
+		var output_file = '\'' + path.basename(file, path.extname(file)) + '.mp4\'';
+		obj.transcode_cmd = 'ffmpeg -i \'' + path.basename(file) +'\' ' + obj.video_transcode + ' ' + obj.audio_transcode +' '+ output_file;
 
 		//ffprobe returns a list of formats that the container might be classified as
 		// i.e. for mp4/mov/etc we'll get a string that looks like: 'mov,mp4,m4a,3gp,3g2,mj2'
@@ -144,7 +144,7 @@ var get_file_data = function(file, callback){
 		}
 		callback(compat, obj);
 	});	
-}
+};
 
 var get_dir_data = function(basedir, dir, return_compat, callback){
 	//reads a directory
@@ -153,7 +153,7 @@ var get_dir_data = function(basedir, dir, return_compat, callback){
 	var response_obj = {};
 	var to_check = [];
 
-	real_dir = path.join(basedir, dir)
+	real_dir = path.join(basedir, dir);
 	files = fs.readdirSync(real_dir);
 	files.forEach(function(f){
 		var file = path.join(dir, f);
@@ -176,7 +176,7 @@ var get_dir_data = function(basedir, dir, return_compat, callback){
 	});
 
 	var append_compat = function(file){
-			console.log('checking compatbility: basedir: '+basedir+' file: '+file)
+			console.log('checking compatbility: basedir: '+basedir+' file: '+ file);
 			get_file_data(path.join(basedir, file), function(compat, data){
 				response_obj[file].compatibility_data = data;
 				response_obj[file].compatible = compat;
@@ -194,54 +194,53 @@ var get_dir_data = function(basedir, dir, return_compat, callback){
 	} else {
 		callback(response_obj);
 	}
-}
+};
 
 var generate_thumb = function(data, options, callback) {
-	var timecode = '5%' // take screenshot 5% into vid (could be specified in seconds instead, e.g. '1' means 1 second in)
+	var timecode = '5%'; // take screenshot 5% into vid (could be specified in seconds instead, e.g. '1' means 1 second in)
 
-	if (options.video_path && options.thumb_path) {
+	if (options.video_path && options.thumb_path && options.thumb_name) {
 		var thumbnailer = new ffmpeg({source: options.video_path})
                 .withSize('320x180')
-                .on('error', function(err) { options.error = 'Thumbnail creation error: ' + err.message; })
+                .on('error', function(err) { options.error = 'Thumbnail creation error: ' + err.message; callback(options); })
                 .on('end', function(filename) {
-			options.success_path = filename.join(', ');
-			//console.log('generated thumb: ' + options.success_path);
-                    })
-		.takeScreenshots({count: 1, timemarks:[timecode], filename: options.thumb_name}, options.thumb_path);
+                	options.success_path = options.thumb_path + options.thumb_name + '.jpg';
+                	callback(options);
+                 })
+                .takeScreenshots({count: 1, timemarks:[timecode], filename: options.thumb_name}, options.thumb_path);
 	}
-
-  callback(options);
-}
+};
 
 var extract_subs = function(data, options, callback){
 	//extract subtitles
 	if(options.subtitletrack){
 		var substream = data.ffprobe_data.streams[options.subtitletrack];
-		var subexts = { //map between 'codec_name' and subtitle extension
-			'ass' : 'ass',
-			'subrip' : 'srt',
-		}
+		var subexts = {
+			ass: 'ass',
+			subrip: 'srt'
+		};
+		
 		subext = subexts[substream.codec_name];
 		if(subext){
 			//extract subtitle stream and pass the file to the subtitle path
-			var subfile = 'extracted_subs_' + Date.now() + '.' +subext
+			var subfile = 'extracted_subs_' + Date.now() + '.' + subext;
 			var subextract = new ffmpeg({ source: pathToMovie, nolog: true, timeout: 0 })
 			.toFormat(subext)
 			.saveToFile(subfile, function(){
 				console.log('sub extraction done');
 
 				//call transcoder
-				options.extracted_subs_file = subfile
-				options.subtitle_path = subfile
+				options.extracted_subs_file = subfile;
+				options.subtitle_path = subfile;
 				callback(options);
-			})
+			});
 		} else {
 			callback(options);
 		}
 	} else {
 		callback(options);
 	}
-}
+};
 
 var cleanup_subs = function(options){
 	if(options.extracted_subs_file){
@@ -249,7 +248,7 @@ var cleanup_subs = function(options){
 		fs.unlinkSync(options.extracted_subs_file);
 		console.log('deleting subs file '+options.extracted_subs_file);
 	}
-}
+};
 
 var transcode_stream = function(file, res, options, ffmpeg_options, callback){
 	/* runs transcoding on file, streaming it out via the res object
@@ -319,10 +318,10 @@ var transcode_stream = function(file, res, options, ffmpeg_options, callback){
 			}
 			//todo: error if any selected stream number is not valid
 
-			console.log('calling transcode with options: '+opts)
+			console.log('calling transcode with options: '+opts);
 			var proc = new ffmpeg({ source: pathToMovie, nolog: true, timeout: 0 })
 			.toFormat('matroska')
-			.addOptions( opts )
+			.addOptions( opts );
 			//.withVideoCodec('copy')
 			//.withAudioCodec('copy')
 			// save to stream
@@ -332,7 +331,7 @@ var transcode_stream = function(file, res, options, ffmpeg_options, callback){
 			
 			//add subtitles options
 			if(subtitle_arg != ''){
-				proc.addOption( subtitle_arg, subtitle_opt ) //have to add subtitle arg separately to deal with spaces
+				proc.addOption( subtitle_arg, subtitle_opt ); //have to add subtitle arg separately to deal with spaces
 			}
 
 			proc.writeToStream(res, function(retcode, ffmpeg_output){
@@ -351,11 +350,11 @@ var transcode_stream = function(file, res, options, ffmpeg_options, callback){
 			}); 
 		}); //extract_subs
 	}); //get_file_data
-}
+};
 
 module.exports = {
   get_file_data: get_file_data,
   get_dir_data: get_dir_data,
   transcode_stream: transcode_stream,
   generate_thumb: generate_thumb
-}
+};

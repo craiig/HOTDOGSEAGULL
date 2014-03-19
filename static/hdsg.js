@@ -13,21 +13,29 @@
     return transcode;
   }
 
-  function checkThumbnail (img, src) {
-    var thumb_wait = 500; // ms
-    $.get('/thumbgen?f=' + src, function(data) {
+  function checkThumbnail (img, src, vid, rep) {
+    var gen_wait = 250; // ms to wait before checking again
+    var max_reps = 8; // max reps before giveup timeout error
+    var rep = rep || 1;
+
+    $.get('/thumbgen?t=' + src + '&v=' + vid, function(data) {
       if (data.thumb_src) {
-        setTimeout(function() { img.className = 'thumb'; img.src = data.thumb_src; }, thumb_wait);
+        img.className = 'thumb';
+        img.src = data.thumb_src;
       }
-      else if (data.message == 'generating') {
-        setTimeout(checkThumbnail(img, src), thumb_wait);
+      else if (data.message == 'generating' && rep < max_reps) {
+        setTimeout(checkThumbnail(img, src, vid, ++rep), gen_wait);
       }
-      //else console.log(data);
+      else {
+        //console.log(data);
+        img.className = 'thumb error';
+        img.src = '';
+      }
     });
   }
 
   $(function() {
-    $('img.generating').each(function(i) {
-       checkThumbnail(this, this.dataset.targetsrc);
+	$('img.generating').each(function(i) {
+		checkThumbnail(this, this.dataset.targetsrc, this.dataset.videosrc);
     });
   });

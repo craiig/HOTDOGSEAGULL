@@ -24,7 +24,7 @@
 	{{?}}
 	<div class="file{{? file.is_dir}} directory{{?}}">
 		{{? file.thumb_generating }}
-			<img class="thumb generating" src="{{=file.thumb_src}}" height="{{=file.thumb_height}}" width="{{=file.thumb_width}}" data-targetsrc="{{=file.thumb_dir + '/' + file.thumb_generating}}"/>
+			<img class="thumb generating" src="{{=file.thumb_src}}" height="{{=file.thumb_height}}" width="{{=file.thumb_width}}" data-videosrc="{{=file.url_name}}" data-targetsrc="{{=file.thumb_dir + '/' + file.thumb_generating}}"/>
 		{{?? file.thumb_src }}
 			<img class="thumb" src="{{=file.thumb_src}}" height="{{=file.thumb_height}}" width="{{=file.thumb_width}}" />
 		{{?}}<div class="filename">{{=basename}}</div>
