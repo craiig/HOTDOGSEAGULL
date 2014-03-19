@@ -1,13 +1,17 @@
-<html>
+<!DOCTYPE html>
+<html data-cast-api-enabled="true">
 <head>
   <link rel="stylesheet" type="text/css" href="static/hdsg.css" media="all" />
+  <script type="text/javascript" src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js"></script>
+  <script src="/static/chromecast.js"></script>
+  <script src="/static/hdsg.js"></script>
 </head>
 <body>
-<p>Current Path: {{=it.dir}}</p>
+<p><b>{{=it.dir}}</b></p>
 
 {{ if(it.dir != '/') { }}
 <div class="nav">
-<a href="viewfolder?f={{=it.parentdir}}">go up (../)</a>
+<a href="viewfolder?f={{=it.parentdir}}">Back up (..)</a>
 </div>
 {{ } }}
 
@@ -15,19 +19,23 @@
 	{{ for(var name in it.files){ }}
 	{{ file = it.files[name]; }}
 	{{ basename = it.require('path').basename(name); }}
-        {{ if (basename == '.DS_Store') continue; }}
-	<div class="file">
-		{{? file.is_dir}}
-			<a href="viewfolder?f={{=name}}">{{=basename}}/</a>
-		{{??}}
-			<a href="playfile?f={{=name}}">{{=basename}}</a>
-		{{?}}
+        {{ if (basename == '.DS_Store' || basename == '.thumbs' || basename == '.localized') continue; }}
+	{{? file.is_dir}}
+		<a href="viewfolder?f={{=file.url_name}}">
+	{{??}}
+		<a href="playfile?f={{=file.url_name}}">
+	{{?}}
+	<div class="file{{? file.is_dir}} directory{{?}}">
+		{{? file.thumb_src}}
+			<img class="thumb" src="{{=file.thumb_src}}" height="{{=file.thumb_height}}" width="{{=file.thumb_width}}" />
+		{{?}}<div class="filename">{{=basename}}</div>
+		{{? !file.is_dir}} <div class="direct"><p><a href="{{=file.static_url}}">Preview native</a> | <a href="javascript:void(0);" onclick="selectMedia(getTranscodeUrl(file)); loadAndPlayMedia();">Cast native</a></p><p><a href="{{=file.transcode_url}}">Preview transcoded</a> | <a href="{{=file.transcode_cast}}">Cast transcoded</a></p></div>{{?}}
 		
 		<!--<div class="compatibility_data">
 			{{ var util = it.require('util'); }}
 			{{= util.inspect(file) }}
 		</div>-->
-	</div>
+	</div></a>
 	{{ } }}
 </div>
 
