@@ -4,11 +4,73 @@ body {
  font-family: helvetica, sans-serif;
 }
 
+div.hidden {
+  display: none;
+}
+
+h2 {
+  margin: 16px 0 4px 0;
+}
+
 div.nav {
- font-size: 10pt;
- margin: 2px 0 8px 0;
+ font-size: 11pt;
+ margin: 2px 0 10px 0;
+}
+  div.nav a {
+   text-decoration: none;
+   color: #555;
+  }
+  div.nav a:hover {
+   text-decoration: underline;
+   color: #000;
+  }
+
+img.thumb {
+  float: left;
+  margin-right: 6px;
 }
 
 div.file {
-  margin: 3px 0 1px 0;
+  clear: both;
+  overflow: hidden;
+  margin: 3px 0 4px 0;
+  padding: 7px;
+  border: 1px solid #ddd;
+  vertical-align: middle;
+}
+  div.file.directory {
+    background: url(/static/folder-icon.gif) 5px center no-repeat;
+    padding-left: 55px;
+    line-height: 40px;
+  }
+  div.file .filename {
+    font-weight: bold;
+    margin: 2px 5px 10px 0px;
+  }
+  div.file .direct a {
+    color: #444;
+    font-size: 11pt;
+    text-decoration: none;
+    border-bottom: 1px dashed #333;
+    margin-bottom: 0px;
+  }
+  div.file .direct a:hover {
+    text-decoration: underline;
+    border-bottom: none;
+    margin-bottom: 1px;
+  }
+
+div.filelist a {
+  text-decoration: none;
+  color: #222;
+}
+div.filelist a:visited {
+  color: #777;
+}
+div.filelist a:hover {
+  color: #009900;
+}
+div.file:hover {
+  border: 1px solid #bbb;
+  cursor: poiner;
 }
