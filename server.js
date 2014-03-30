@@ -1,6 +1,5 @@
 // change these per-installation
-var media_folder = 'media';
-var listenPort = 3000;
+var config = require('./config')
 
 var chromecast = require('./chromecast.js')
 var fs = require('fs');
@@ -37,16 +36,16 @@ app.use(express.logger());
 
 app.use('/static', express.static(__dirname + '/static'));
 
-app.use('/static_media', express.static( path.resolve(__dirname, media_folder) ));
+app.use('/static_media', express.static( path.resolve(__dirname, config.media_folder) ));
 
 app.get('/', function(req, res){
-	pathResolves = fs.existsSync(path.resolve(__dirname, media_folder));
+	pathResolves = fs.existsSync(path.resolve(__dirname, config.media_folder));
 	if (! pathResolves){
- 		 res.render('error.html', {statusCode: '404', message: 'Invalid media directory. Set "media_folder" var in server.js to a valid local path.'});
+ 		 res.render('error.html', {statusCode: '404', message: 'Invalid media directory. Set "config.media_folder" var in server.js to a valid local path.'});
 	}
  	else{
-		chromecast.get_dir_data(media_folder, '/', false, function(files){
-			res.render('index.html', {files: files, dir: media_folder})	
+		chromecast.get_dir_data(config.media_folder, '/', false, function(files){
+			res.render('index.html', {files: files, dir: config.media_folder})	
 		});
 	}
 });
@@ -67,7 +66,7 @@ app.get('/viewfolder', function(req, res){
 	dir = path.join('/', req.query.f)
 	//res.send(dir)
 	parentdir = path.join(dir, '../')
-	chromecast.get_dir_data(media_folder, dir, false, function(files){
+	chromecast.get_dir_data(config.media_folder, dir, false, function(files){
 		res.render('index.html', {files: files, dir: dir, parentdir: parentdir})	
 	})
 });
@@ -76,7 +75,7 @@ app.get('/playfile', function(req, res){
 	file_url = path.join('/static_media', req.query.f)
 	transcode_url = path.join('/transcode?f=', req.query.f)
 
-	chromecast.get_file_data(path.join(media_folder, req.query.f), function(compat, data){
+	chromecast.get_file_data(path.join(config.media_folder, req.query.f), function(compat, data){
         	if (data.ffprobe_data == undefined) data.ffprobe_data = {streams: []};
 		res.render('playfile.html', {
 			query: req.query, 
@@ -92,7 +91,7 @@ app.get('/playfile', function(req, res){
 
 app.get('/transcode', function(req, res) {
 	// borrowed from the  ffmpeg-fluent examples
-	pathToMovie = path.join(media_folder, req.query.f)
+	pathToMovie = path.join(config.media_folder, req.query.f)
 
 	options = { }
 	if(req.query.audiotrack){
@@ -120,4 +119,4 @@ app.get('/transcode', function(req, res) {
  
 });
 
-app.listen(listenPort);
+app.listen(config.listenPort);
