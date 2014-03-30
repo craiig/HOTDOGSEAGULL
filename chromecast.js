@@ -112,6 +112,8 @@ var get_file_data = function(file, callback){
 					stream.video_transcode = get_video_encode(); //get default encoding for chromecast
 				}
 				stream.transcode_track_id = track_video++;
+
+				if(obj.video_transcode == undefined) obj.video_transcode = stream.video_transcode
 			}
 
 			if(stream.codec_type == 'audio'){
@@ -124,12 +126,14 @@ var get_file_data = function(file, callback){
 					stream.audio_transcode = get_audio_encode(); //get default encoding for chromecast
 				}
 				stream.transcode_track_id = track_audio++;
+
+				if(obj.audio_transcode == undefined) obj.audio_transcode = stream.audio_transcode
 			}
 		}
 
 		//generate a recommended transcode command
-		var output_file = '\'' + path.basename(file, path.extname(file)) + '.mp4\''
-		obj.transcode_cmd = 'ffmpeg -i \'' + path.basename(file) +'\' ' + obj.video_transcode + ' ' + obj.audio_transcode +' '+ output_file
+		var output_file = '"' + path.basename(file, path.extname(file)) + '.mp4"'
+		obj.transcode_cmd = 'ffmpeg -i "' + path.basename(file) +'" -strict -2 ' + obj.video_transcode + ' ' + obj.audio_transcode +' '+ output_file
 
 		//ffprobe returns a list of formats that the container might be classified as
 		// i.e. for mp4/mov/etc we'll get a string that looks like: 'mov,mp4,m4a,3gp,3g2,mj2'

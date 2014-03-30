@@ -51,6 +51,18 @@ app.get('/', function(req, res){
 	}
 });
 
+app.get('/queue', function(req, res){
+	pathResolves = fs.existsSync(path.resolve(__dirname, media_folder));
+	if (! pathResolves){
+ 		 res.render('error.html', {statusCode: '404', message: 'Invalid media directory. Set "media_folder" var in server.js to a valid local path.'});
+	}
+ 	else{
+		chromecast.get_dir_data(media_folder, '/', false, function(files){
+			res.render('index_queue.html', {files: files, dir: media_folder})	
+		});
+	}
+});
+
 app.get('/viewfolder', function(req, res){
 	dir = path.join('/', req.query.f)
 	//res.send(dir)
