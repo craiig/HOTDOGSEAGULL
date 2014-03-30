@@ -340,8 +340,17 @@ var transcode_stream = function(file, res, options, ffmpeg_options, callback){
 	}); //get_file_data
 }
 
+var check_dependencies = function(callback){
+	//check that ffmpeg is available by seeing if we can parse the available codecs
+	var f = new ffmpeg({source: ""})
+	f.getAvailableCodecs(function(err, data){
+		callback(err);
+	});
+}
+
 module.exports = {
   get_file_data: get_file_data,
   get_dir_data: get_dir_data,
-  transcode_stream : transcode_stream
+  transcode_stream: transcode_stream,
+  check_dependencies: check_dependencies,
 }

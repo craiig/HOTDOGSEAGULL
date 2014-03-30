@@ -35,6 +35,7 @@ if(!config.listenPort){
 console.log("Config settings:")
 console.log(util.inspect(config));
 
+
 //setup server
 var app = express();
 
@@ -146,9 +147,17 @@ app.get('/transcode', function(req, res) {
 	});
 });
 
-var server = http.createServer(app)
-server.on("listening", function(){
-	console.log("Server listening, visit http://<localip>:"+config.listenPort)
+chromecast.check_dependencies(function(err){
+	if(err){
+		console.log("Error running ffmpeg:");
+		console.log(err.message);
+	} else {
+		var server = http.createServer(app)
+		server.on("listening", function(){
+			console.log("Server listening, visit http://<local_network_ip>:"+config.listenPort)
+			console.log("(Ensure that IP you use is accessible to the chromecast)")
+		})
+		server.listen(config.listenPort);
+		//app.listen(config.listenPort);
+	}
 })
-server.listen(config.listenPort);
-//app.listen(config.listenPort);
