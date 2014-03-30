@@ -29,7 +29,8 @@ git clone https://github.com/craiig/HOTDOGSEAGULL
 cd HOTDOGSEAGULL
 brew install ffmpeg --with-libass --enable-libx264
 npm install
-edit 'media_folder' variable in server.js to point to your media directory
+cp config.sample.json config.json
+edit 'media_folder' variable in config.json to point to your media directory
 node server.js
 Visit http://<local_ip>:3000 in a web browser.
 ```
