@@ -1,6 +1,8 @@
-// change these per-installation
-var config = require('./config')
+//setup:
+// 1. copy config.json from config.sample.js
+// 2. edit config.json to change settings for this application
 
+//load modules
 var chromecast = require('./chromecast.js')
 var fs = require('fs');
 var dot = require('dot');
@@ -8,6 +10,30 @@ var express = require('express');
 var path = require('path')
 var util = require('util')
 
+//attempt to load config file
+var config = {};
+try {
+ config = require('./config');
+} catch(err){
+	if(err.code == "MODULE_NOT_FOUND"){
+		//not found, so set up the default settings
+		console.log("Warning: config.js not found, using defaults.");
+	} else {
+		throw err;
+	}
+}
+
+//set some default configurations if we didn't find them in config.
+if(!config.media_folder){
+	config.media_folder = "media";
+}
+if(!config.listenPort){
+	config.listenPort = 3000;
+}
+console.log("HOTDOGSEAGULL config:")
+console.log(util.inspect(config));
+
+//setup server
 var app = express();
 
 dot.templateSettings.strip = false;
@@ -116,7 +142,6 @@ app.get('/transcode', function(req, res) {
 			console.log(ffmpeg_output);
 		}
 	});
- 
 });
 
 app.listen(config.listenPort);
