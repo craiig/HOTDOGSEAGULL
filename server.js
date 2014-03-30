@@ -7,8 +7,10 @@ var chromecast = require('./chromecast.js')
 var fs = require('fs');
 var dot = require('dot');
 var express = require('express');
-var path = require('path')
-var util = require('util')
+var path = require('path');
+var util = require('util');
+var http = require('http');
+var os = require('os');
 
 //attempt to load config file
 var config = {};
@@ -30,7 +32,7 @@ if(!config.media_folder){
 if(!config.listenPort){
 	config.listenPort = 3000;
 }
-console.log("HOTDOGSEAGULL config:")
+console.log("Config settings:")
 console.log(util.inspect(config));
 
 //setup server
@@ -144,4 +146,9 @@ app.get('/transcode', function(req, res) {
 	});
 });
 
-app.listen(config.listenPort);
+var server = http.createServer(app)
+server.on("listening", function(){
+	console.log("Server listening, visit http://<localip>:"+config.listenPort)
+})
+server.listen(config.listenPort);
+//app.listen(config.listenPort);

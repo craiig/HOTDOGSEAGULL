@@ -64,7 +64,6 @@ Here are some features that would be good to add:
  * Packaging this up for less technical users on other systems.
 
 Here's what I'm working on:
- * Automatic extraction of in-stream subs
  * Improving the player interaction with the chromecast
  * Play whole directory (gimme dat binge)
  * DLNA support (if possible)
