@@ -11,6 +11,7 @@ var path = require('path');
 var util = require('util');
 var http = require('http');
 var os = require('os');
+var logger = require('morgan');
 
 //attempt to load config file
 var config = {};
@@ -57,11 +58,11 @@ app.engine('html', function(path, options, callback){
 app.set('views', path.join(__dirname + '/views'))
 
 // define custom logging format
-/*express.logger.format('detailed', function (token, req, res) {                                    
+/*logger.format('detailed', function (token, req, res) {                                    
     return util.inspect(req.headers);
 });  */
 
-app.use(express.logger());
+app.use(logger());
 
 app.use('/static', express.static(__dirname + '/static'));
 
