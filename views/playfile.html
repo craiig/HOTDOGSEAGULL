@@ -13,11 +13,12 @@ new session: start playback asap
 existing session: show what's playing & allow it to be interrupted
 we'll only see existing sessions for our own paticular app - or someone else's
 todo: properly mirror volume control via session information
-	-->
+  -->
 
 <!DOCTYPE html>
 <html data-cast-api-enabled="true">
 <head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{{=it.file_name}} to Chromecast</title>
 <script type="text/javascript" src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js"></script>
 <script type="text/javascript" src="/static/chromecast.js"></script>
@@ -31,155 +32,184 @@ function calculateProgress(value){
   }
 }
 </script>
+<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
 <link rel="stylesheet" type="text/css" href="static/hdsg.css" media="all" />
 </head>
 <body>
   <h1>{{=it.file_name}}</h1>
   <p><a href="/viewfolder?f={{=it.file_dir}}">Back to directory</a></p>
 
-<h2>Player Controls</h2>
-<p>Direct URL to media: <a href="{{=it.file_url}}">{{=it.file_url}}</a></p>
-  <div id="currentlyplaying">Currently Playing: <span id='currentmedianame'>Nothing</span></div>
-  <div class="playerstate">
-    State : <span id="playerstate">IDLE</span>
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Player Controls</h3>
+  </div>
+  <div class="panel-body"
+  <p>Direct URL to media: <a href="{{=it.file_url}}">{{=it.file_url}}</a></p>
+    <div id="currentlyplaying">Currently Playing: <span id='currentmedianame'>Nothing</span></div>
+    <div class="playerstate">
+      State : <span id="playerstate">IDLE</span>
+    </div>
   </div>
 
-<div class="volume">
-	Volume: 100%
-	<input id="volume" type="range" min="0" max="100" step="1" onmouseup="setMediaVolume(1-this.value/100,false);">
-	0%
-	<div id="mute">
-	<span id="muteText">Mute media</span>
-	<input type="checkbox" id="mutebox" onclick="muteMedia(this);"> 
-	</div>
+
+  <div class="volume">
+    Volume: 100%
+    <input id="volume" type="range" min="0" max="100" step="1" onmouseup="setMediaVolume(1-this.value/100,false);">
+    0%
+    <div id="mute">
+    <span id="muteText">Mute media</span>
+    <input type="checkbox" id="mutebox" onclick="muteMedia(this);">
+    </div>
+  </div>
+  <div class="progress">
+      Progress : <input style="width: 60%" id="progress" type="range" min="1" max="100" value="1" step="0.1" onmouseup="seekMedia(this.value);" oninput="document.getElementById('currentmedia_progress').innerHTML = calculateProgress(this.value);">
+      <span id="currentmedia_progress">0</span> / <span id="currentmedia_duration">100%</span>
+      <br/>
+    </div>
+
+  <div class="debug_buttons">
+      <button onclick="selectMedia(file); loadAndPlayMedia()">Play {{=it.file_name}}</button>{{? it.compatible }}
+          (Compatible)
+        {{??}}
+          (Not Compatible)
+        {{?}}
+      <br>
+
+          <button id="playpauseresume" onclick="playMedia()">Play</button>
+          <button id="playpauseresume" onclick="stopMedia()">Stop</button>
+  </div>
+
 </div>
-<div class="progress">
-    Progress : <input style="width: 60%" id="progress" type="range" min="1" max="100" value="1" step="0.1" onmouseup="seekMedia(this.value);" oninput="document.getElementById('currentmedia_progress').innerHTML = calculateProgress(this.value);">
-    <span id="currentmedia_progress">0</span> / <span id="currentmedia_duration">100%</span>
-    <br/>
+
+<div class="panel panel-default">
+
+  <div class="panel-heading">
+    <h3 class="panel-title">Transcoding</h3>
   </div>
 
-<div class="debug_buttons">
-		<button onclick="selectMedia(file); loadAndPlayMedia()">Play {{=it.file_name}}</button>{{? it.compatible }}
-        (Compatible)
-      {{??}}
-        (Not Compatible)
+  <div class="panel-body">
+    <p>Direct URL <a href="{{=it.transcode_url}}" id='transcodeurl'>{{=it.transcode_url}}</a></p>
+
+  <button onclick="selectMedia(getTranscodeUrl()); loadAndPlayMedia()">Transcode {{=it.file_name}}</button>
+          <br>
+
+  </p>Video Track:
+  <select name="videotrack" id="videotrack" onchange="setTranscodeDirectUrl();">
+  {{ for(var i in it.compatibility_data.ffprobe_data.streams ){ }}
+    {{ var stream = it.compatibility_data.ffprobe_data.streams[i]; }}
+    {{? stream.codec_type == 'video' }}
+    <option value="{{=stream.transcode_track_id}}">Stream {{= i }}:
+      {{? stream['TAG:language'] }}
+        {{= stream['TAG:language'] }}
       {{?}}
-		<br>
-
-        <button id="playpauseresume" onclick="playMedia()">Play</button>
-        <button id="playpauseresume" onclick="stopMedia()">Stop</button>
-</div>  
-
-
-<h2>Transcoding</h2>
-  <p>Direct URL to transcode: <a href="{{=it.transcode_url}}" id='transcodeurl'>{{=it.transcode_url}}</a></p>
-
-<button onclick="selectMedia(getTranscodeUrl()); loadAndPlayMedia()">Transcode {{=it.file_name}}</button>
-        <br>
-
-</p>Video Track:
-<select name="videotrack" id="videotrack" onchange="setTranscodeDirectUrl();">
-{{ for(var i in it.compatibility_data.ffprobe_data.streams ){ }}
-  {{ var stream = it.compatibility_data.ffprobe_data.streams[i]; }}
-  {{? stream.codec_type == 'video' }}
-  <option value="{{=stream.transcode_track_id}}">Stream {{= i }}:
-    {{? stream['TAG:language'] }}
-      {{= stream['TAG:language'] }}
+      {{= stream.codec_name }}
+    </option>
     {{?}}
-    {{= stream.codec_name }}
-  </option>
-  {{?}}
-{{ } }}
-</select> <br/>
+  {{ } }}
+  </select> <br/>
 
-Audio Track:
-<select name="audiotrack" id="audiotrack" onchange="setTranscodeDirectUrl();">
-{{ for(var i in it.compatibility_data.ffprobe_data.streams ){ }}
-  {{ var stream = it.compatibility_data.ffprobe_data.streams[i]; }}
-  {{? stream.codec_type == 'audio' }}
-  <option value="{{=stream.transcode_track_id}}">Stream {{= i }}:
-    {{? stream['TAG:language'] }}
-      {{= stream['TAG:language'] }}
+  Audio Track:
+  <select name="audiotrack" id="audiotrack" onchange="setTranscodeDirectUrl();">
+  {{ for(var i in it.compatibility_data.ffprobe_data.streams ){ }}
+    {{ var stream = it.compatibility_data.ffprobe_data.streams[i]; }}
+    {{? stream.codec_type == 'audio' }}
+    <option value="{{=stream.transcode_track_id}}">Stream {{= i }}:
+      {{? stream['TAG:language'] }}
+        {{= stream['TAG:language'] }}
+      {{?}}
+      {{= stream.codec_name }}
+    </option>
     {{?}}
-    {{= stream.codec_name }}
-  </option>
+  {{ } }}
+  </select> <br/>
+
+  Subtitles File:
+  <select name="subtitles" id="subtitles" onchange="setTranscodeDirectUrl();">
+      <option value="">None</option>
+  {{? it.compatibility_data.subtitle_file }}
+    <option selected value="{{=it.compatibility_data.subtitle_file}}">{{=it.compatibility_data.subtitle_file}}</option>
   {{?}}
-{{ } }}
-</select> <br/>
+  </select> <br/>
 
-Subtitles File:
-<select name="subtitles" id="subtitles" onchange="setTranscodeDirectUrl();">
-    <option value="">None</option>
-{{? it.compatibility_data.subtitle_file }}
-  <option selected value="{{=it.compatibility_data.subtitle_file}}">{{=it.compatibility_data.subtitle_file}}</option>
-{{?}}
-</select> <br/>
-
-Subtitle Track:
-<select name="subtitletrack" id="subtitletrack" onchange="setTranscodeDirectUrl();">
-    <option value="" selected>None</option>
-{{ for(var i in it.compatibility_data.ffprobe_data.streams ){ }}
-  {{ var stream = it.compatibility_data.ffprobe_data.streams[i]; }}
-  {{? stream.codec_type == 'subtitle' }}
-  <option value="{{= i }}">Stream {{= i }}:
-    {{? stream['TAG:language'] }}
-      {{= stream['TAG:language'] }}
+  Subtitle Track:
+  <select name="subtitletrack" id="subtitletrack" onchange="setTranscodeDirectUrl();">
+      <option value="" selected>None</option>
+  {{ for(var i in it.compatibility_data.ffprobe_data.streams ){ }}
+    {{ var stream = it.compatibility_data.ffprobe_data.streams[i]; }}
+    {{? stream.codec_type == 'subtitle' }}
+    <option value="{{= i }}">Stream {{= i }}:
+      {{? stream['TAG:language'] }}
+        {{= stream['TAG:language'] }}
+      {{?}}
+      {{= stream.codec_name }}
+    </option>
     {{?}}
-    {{= stream.codec_name }}
-  </option>
-  {{?}}
-{{ } }}
-</select> <br/>
+  {{ } }}
+  </select> <br/>
 
-<!-- Subtitle Track:
-<select name="subtitletrack" id="subtitletrack" onchange="setTranscodeDirectUrl();">
-{{ for(var i in it.compatibility_data.ffprobe_data.streams ){ }}
-  {{ var stream = it.compatibility_data.ffprobe_data.streams[i]; }}
-  {{? stream.codec_type == 'subtitle' }}
-  <option>Stream {{= i }}:
-    {{? stream['TAG:language'] }}
-      {{= stream['TAG:language'] }}
+  <!-- Subtitle Track:
+  <select name="subtitletrack" id="subtitletrack" onchange="setTranscodeDirectUrl();">
+  {{ for(var i in it.compatibility_data.ffprobe_data.streams ){ }}
+    {{ var stream = it.compatibility_data.ffprobe_data.streams[i]; }}
+    {{? stream.codec_type == 'subtitle' }}
+    <option>Stream {{= i }}:
+      {{? stream['TAG:language'] }}
+        {{= stream['TAG:language'] }}
+      {{?}}
+      {{= stream.codec_name }}
+    </option>
     {{?}}
-    {{= stream.codec_name }}
-  </option>
-  {{?}}
-{{ } }}
-</select></p> -->
+  {{ } }}
+  </select></p> -->
+  </div>
+</div>
 
-<h2>Debug Controls</h2>
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Debug Controls</h3>
+  </div>
+
+  <div class="panel-body>"
    <div class="debug_buttons">
         <button onclick="launchApp()">Launch app</button>
         <button onclick="stopApp()">Stop app</button>
         <button onclick="stopMedia()">Unload media</button>
-	</div>
+    </div>
 
-  <div class="debug">
-    <textarea rows="20" cols="70" id="debugmessage">
-    </textarea>
+    <div class="debug">
+      <textarea rows="20" cols="70" id="debugmessage">
+      </textarea>
+    </div>
   </div>
+</div>
 
-<h2>File compatibility information</h2>
-  <div class="compatibility">
-  	<div class='prediction'>
-  		Compatibility guess:
-  		{{? it.compatible }}
-  			Should work.
-  		{{??}}
-  			Won't work.
-  		{{?}}
-  	</div>
-  	<div class="debug">
-  		Container compatible: {{= it.compatibility_data.container == 1 ? "yes" : "no" }}<br/>
-  		Video compatible: {{= it.compatibility_data.video == 1 ? "yes" : "no" }}<br/>
-  		Audio compatible: {{= it.compatibility_data.audio == 1 ? "yes" : "no" }}<br/>
-  		<br/>
-  		Full Compatibility Debugging Data: <br/>
-		<pre>
-  		{{= it.require('util').inspect(it.compatibility_data, {depth: null}) }}
-  		</pre>
-  	</div>
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">File compatibility information</h3>
   </div>
+  <div class="panel-body">
+    <div class="compatibility">
+      <div class='prediction'>
+        Compatibility guess:
+        {{? it.compatible }}
+          Should work.
+        {{??}}
+          Won't work.
+        {{?}}
+      </div>
+      <div class="debug">
+        Container compatible: {{= it.compatibility_data.container == 1 ? "yes" : "no" }}<br/>
+        Video compatible: {{= it.compatibility_data.video == 1 ? "yes" : "no" }}<br/>
+        Audio compatible: {{= it.compatibility_data.audio == 1 ? "yes" : "no" }}<br/>
+        <br/>
+        Full Compatibility Debugging Data: <br/>
+      <pre>
+        {{= it.require('util').inspect(it.compatibility_data, {depth: null}) }}
+        </pre>
+      </div>
+    </div>
+  </div>
+</div>
 
 <script type="text/javascript">
   function setTranscodeDirectUrl(){
@@ -196,8 +226,8 @@ Subtitle Track:
     return transcode;
   }
 
-	var file = document.location.origin + '{{= it.file_url.replace("'", "\\'") }}';
-	selectMedia(file);
+  var file = document.location.origin + '{{= it.file_url.replace("'", "\\'") }}';
+  selectMedia(file);
   setTranscodeDirectUrl();
 </script>
 </body>

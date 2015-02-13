@@ -1,34 +1,43 @@
 <html>
 <head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
   <link rel="stylesheet" type="text/css" href="static/hdsg.css" media="all" />
 </head>
 <body>
-<p>Current Path: {{=it.dir}}</p>
 
-{{ if(it.dir != '/') { }}
-<div class="nav">
-<a href="viewfolder?f={{=it.parentdir}}">go up (../)</a>
-</div>
-{{ } }}
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">{{=it.dir}}</h3>
+  </div>
 
-<div class="filelist">
-	{{ for(var name in it.files){ }}
-	{{ file = it.files[name]; }}
-	{{ basename = it.require('path').basename(name); }}
-        {{ if (basename == '.DS_Store') continue; }}
-	<div class="file">
-		{{? file.is_dir}}
-			<a href="viewfolder?f={{=name}}">{{=basename}}/</a>
-		{{??}}
-			<a href="playfile?f={{=name}}">{{=basename}}</a>
-		{{?}}
-		
-		<!--<div class="compatibility_data">
-			{{ var util = it.require('util'); }}
-			{{= util.inspect(file) }}
-		</div>-->
-	</div>
-	{{ } }}
+  <div class="panel-body">
+    <ul class="list-group">
+
+      {{ if(it.dir != '/') { }}
+        <a href="viewfolder?f={{=it.parentdir}}" class="list-group-item">go up (..)</a>
+      {{ } }}
+
+      {{ for(var name in it.files){ }}
+      {{ file = it.files[name]; }}
+      {{ basename = it.require('path').basename(name); }}
+            {{ if (basename == '.DS_Store') continue; }}
+
+        {{? file.is_dir}}
+          <a href="viewfolder?f={{=name}}" class="list-group-item">{{=basename}}/</a>
+        {{??}}
+          <a href="playfile?f={{=name}}" class="list-group-item">{{=basename}}</a>
+        {{?}}
+
+        <!--<div class="compatibility_data">
+          {{ var util = it.require('util'); }}
+          {{= util.inspect(file) }}
+        </div>-->
+
+      {{ } }}
+    </ul>
+  </div>
+
 </div>
 
 </body>
